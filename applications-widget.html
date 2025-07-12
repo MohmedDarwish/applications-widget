@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Applications Search Widget</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Zoho Creator JS SDK -->
+    <script src="https://js.zohostatic.com/creator/widgets/sdk/js/ZCWidget.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
@@ -344,6 +346,16 @@
             display: none;
         }
         
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -373,9 +385,12 @@
         <!-- Debug Info (hidden by default) -->
         <div class="debug-info" id="debugInfo">
             Widget Status: <span id="debugStatus">Initializing...</span><br>
-            Data Source: <span id="debugSource">Unknown</span><br>
+            API Status: <span id="apiStatus">Not initialized</span><br>
             Records Count: <span id="debugCount">0</span>
         </div>
+        
+        <!-- Error Message -->
+        <div class="error-message" id="errorMessage"></div>
         
         <!-- Search Section -->
         <div class="search-section">
@@ -447,13 +462,14 @@
         let filteredData = [];
         let currentSearchTerm = '';
         let isDebugMode = false;
+        let zcWidget = null;
         
         // Initialize widget
         function initWidget() {
             console.log('Widget initialized');
-            updateDebug('Widget initialized', 'Initialization', 0);
+            updateDebug('Widget initialized', 'Initializing API');
             
-            // Check if debug mode is enabled (for testing)
+            // Check if debug mode is enabled
             const urlParams = new URLSearchParams(window.location.search);
             isDebugMode = urlParams.get('debug') === 'true';
             
@@ -471,68 +487,130 @@
                 });
             }
             
-            // Listen for data from parent (Zoho)
-            window.addEventListener('message', handleMessage);
+            // Initialize Zoho Creator Widget SDK
+            initializeZohoAPI();
+        }
+        
+        // Initialize Zoho Creator API
+        function initializeZohoAPI() {
+            console.log('Initializing Zoho Creator API...');
+            updateDebug('API initializing', 'Connecting to Zoho');
             
-            // Request data from Zoho or load sample data
-            setTimeout(requestDataFromZoho, 1000);
+            try {
+                // Initialize ZC Widget SDK
+                if (typeof ZCWidget !== 'undefined') {
+                    zcWidget = ZCWidget.init();
+                    updateDebug('API connected', 'Zoho Creator');
+                    
+                    // Load applications data using API
+                    loadApplicationsFromAPI();
+                } else {
+                    console.error('ZCWidget SDK not loaded');
+                    updateDebug('API failed', 'SDK not loaded');
+                    showError('Zoho Creator SDK not loaded. Please ensure widget is running within Zoho Creator.');
+                    loadSampleData(); // Fallback to sample data
+                }
+            } catch (error) {
+                console.error('Error initializing Zoho API:', error);
+                updateDebug('API error', error.message);
+                showError('Error connecting to Zoho Creator API: ' + error.message);
+                loadSampleData(); // Fallback to sample data
+            }
+        }
+        
+        // Load applications data using Zoho Creator API
+        function loadApplicationsFromAPI() {
+            console.log('Loading applications from Zoho Creator API...');
+            updateDebug('Loading data', 'Fetching from API');
+            
+            try {
+                // Use ZC Widget API to fetch data
+                zcWidget.getRecords({
+                    reportName: 'All_Applications', // Your report name
+                    criteria: '', // Empty for all records
+                    maxRecords: 1000
+                }).then(function(response) {
+                    console.log('API Response:', response);
+                    
+                    if (response && response.data) {
+                        processAPIData(response.data);
+                        updateDebug('Data loaded', 'API Success');
+                    } else {
+                        throw new Error('No data received from API');
+                    }
+                }).catch(function(error) {
+                    console.error('API Error:', error);
+                    updateDebug('API error', error.message);
+                    showError('Error fetching data: ' + error.message);
+                    loadSampleData(); // Fallback to sample data
+                });
+            } catch (error) {
+                console.error('Error calling API:', error);
+                updateDebug('API call failed', error.message);
+                showError('Error calling Zoho Creator API: ' + error.message);
+                loadSampleData(); // Fallback to sample data
+            }
+        }
+        
+        // Process API data and convert to widget format
+        function processAPIData(apiData) {
+            console.log('Processing API data:', apiData);
+            
+            applicationsData = [];
+            
+            apiData.forEach(function(record) {
+                try {
+                    const app = {
+                        id: record.ID || '',
+                        appId: record.App_ID || 'N/A',
+                        studentName: record.Student_Application?.Full_Name || 'N/A',
+                        studentId: record.Student_Application?.ID || 'N/A',
+                        passport: record.Student_Application?.Passport_No || 'N/A',
+                        program: record.Application_Program?.Program_Name || 'N/A',
+                        degree: record.Degree || 'N/A',
+                        academicYear: record.Application_Academic_Year?.Academic_Year || 'N/A',
+                        semester: record.Application_Semester?.Semester_Name || 'N/A',
+                        stage: record.Application_Stage || 'Pending Review',
+                        viewUrl: buildViewUrl(record.ID)
+                    };
+                    
+                    applicationsData.push(app);
+                } catch (error) {
+                    console.error('Error processing record:', record, error);
+                }
+            });
+            
+            filteredData = [...applicationsData];
+            updateDebug('Data processed', 'Success');
+            renderApplications();
+            updateSearchResults();
+        }
+        
+        // Build view URL for application
+        function buildViewUrl(applicationId) {
+            // You'll need to adjust this based on your actual URL structure
+            return `#page:Application_Details?application_id=${applicationId}`;
+        }
+        
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
         }
         
         // Update debug information
-        function updateDebug(status, source, count) {
+        function updateDebug(status, apiStatus) {
             if (isDebugMode) {
                 document.getElementById('debugStatus').textContent = status;
-                document.getElementById('debugSource').textContent = source;
-                document.getElementById('debugCount').textContent = count;
+                document.getElementById('apiStatus').textContent = apiStatus;
+                document.getElementById('debugCount').textContent = applicationsData.length;
             }
         }
         
-        // Handle messages from parent window (Zoho)
-        function handleMessage(event) {
-            console.log('Received message from parent:', event.data);
-            updateDebug('Message received', 'Zoho Creator', 0);
-            
-            if (event.data && event.data.type === 'APPLICATIONS_DATA') {
-                console.log('Processing applications data:', event.data.applications);
-                applicationsData = event.data.applications || [];
-                filteredData = [...applicationsData];
-                updateDebug('Data loaded', 'Zoho Creator', applicationsData.length);
-                renderApplications();
-                updateSearchResults();
-            }
-        }
-        
-        // Request data from Zoho
-        function requestDataFromZoho() {
-            console.log('Requesting data from Zoho parent window...');
-            updateDebug('Requesting data', 'Zoho Creator', 0);
-            
-            // Send message to parent window asking for data
-            if (window.parent && window.parent !== window) {
-                console.log('Sending request to parent window');
-                window.parent.postMessage({
-                    type: 'REQUEST_APPLICATIONS_DATA'
-                }, '*');
-                
-                // Wait 3 seconds, if no response, load sample data
-                setTimeout(function() {
-                    if (applicationsData.length === 0) {
-                        console.log('No response from parent, loading sample data');
-                        updateDebug('Timeout - loading sample', 'Sample Data', 0);
-                        loadSampleData();
-                    }
-                }, 3000);
-            } else {
-                // If no parent (testing), load sample data immediately
-                console.log('No parent window detected, loading sample data');
-                updateDebug('No parent window', 'Sample Data', 0);
-                loadSampleData();
-            }
-        }
-        
-        // Load sample data for testing
+        // Load sample data for testing (fallback)
         function loadSampleData() {
-            console.log('Loading sample data for testing...');
+            console.log('Loading sample data...');
             
             applicationsData = [
                 {
@@ -573,24 +651,11 @@
                     semester: 'Fall',
                     stage: 'Awaiting Review',
                     viewUrl: '#'
-                },
-                {
-                    id: 4,
-                    appId: 'APP004',
-                    studentName: 'Omar Khaled',
-                    studentId: 'STU004',
-                    passport: 'P901234',
-                    program: 'Management, BS',
-                    degree: 'Bachelor',
-                    academicYear: '2025/2026',
-                    semester: 'Fall',
-                    stage: 'Complete',
-                    viewUrl: '#'
                 }
             ];
             
             filteredData = [...applicationsData];
-            updateDebug('Sample data loaded', 'Sample Data', applicationsData.length);
+            updateDebug('Sample data loaded', 'Fallback mode');
             renderApplications();
             updateSearchResults();
         }
@@ -759,9 +824,6 @@
         } else {
             initWidget();
         }
-        
-        // Initialize after a short delay (Zoho compatibility)
-        setTimeout(initWidget, 500);
     </script>
 </body>
 </html>
