@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications Search Widget</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333333;
+            padding: 20px;
+        }
+        
+        .widget-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #113e68;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(17, 62, 104, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 18px;
+            pointer-events: none;
+        }
+        
+        .search-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+        
+        .search-results {
+            font-weight: 600;
+            color: #113e68;
+        }
+        
+        .clear-search {
+            background: none;
+            border: none;
+            color: #113e68;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: underline;
+            padding: 0;
+        }
+        
+        .clear-search:hover {
+            color: #0d2f4f;
+        }
+        
+        .applications-section {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .applications-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .applications-table th {
+            background: #f8f9fa;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 13px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .applications-table td {
+            padding: 20px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        
+        .applications-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .applications-table tbody tr:hover {
+            background: rgba(17, 62, 104, 0.03);
+            transform: translateX(4px);
+        }
+        
+        .app-id-cell {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .student-name {
+            font-weight: 600;
+            color: #113e68;
+            margin-bottom: 2px;
+        }
+        
+        .student-id {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .program-info {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .academic-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .year-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            width: fit-content;
+        }
+        
+        .semester-badge {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            width: fit-content;
+            margin-top: 2px;
+        }
+        
+        .degree-badge {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .stage-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        
+        .stage-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #f57c00;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .stage-approved {
+            background: rgba(59, 178, 144, 0.15);
+            color: #3bb290;
+            border: 1px solid rgba(59, 178, 144, 0.3);
+        }
+        
+        .stage-rejected {
+            background: rgba(244, 67, 54, 0.15);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        
+        .stage-review {
+            background: rgba(156, 39, 176, 0.15);
+            color: #7b1fa2;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+        
+        .stage-conditional {
+            background: rgba(255, 152, 0, 0.15);
+            color: #f57c00;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .stage-complete {
+            background: rgba(59, 178, 144, 0.15);
+            color: #3bb290;
+            border: 1px solid rgba(59, 178, 144, 0.3);
+        }
+        
+        .stage-missing {
+            background: rgba(255, 152, 0, 0.15);
+            color: #ff9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .view-btn {
+            background: linear-gradient(135deg, #113e68, #0d2f4f);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .view-btn:hover {
+            background: linear-gradient(135deg, #0d2f4f, #0a2640);
+            transform: translateY(-2px);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 40px;
+            color: #6c757d;
+            display: none;
+        }
+        
+        .no-results i {
+            font-size: 48px;
+            color: #dee2e6;
+            margin-bottom: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .loading i {
+            font-size: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #6c757d;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .search-section {
+                padding: 15px;
+            }
+            
+            .search-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .applications-table th:nth-child(4),
+            .applications-table td:nth-child(4),
+            .applications-table th:nth-child(5),
+            .applications-table td:nth-child(5) {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="widget-container">
+        <!-- Debug Info (hidden by default) -->
+        <div class="debug-info" id="debugInfo">
+            Widget Status: <span id="debugStatus">Initializing...</span><br>
+            Data Source: <span id="debugSource">Unknown</span><br>
+            Records Count: <span id="debugCount">0</span>
+        </div>
+        
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" 
+                       id="searchInput" 
+                       class="search-input" 
+                       placeholder="Search by Student Name, App ID, Passport, Program, or Stage..."
+                       autocomplete="off">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <div class="search-info">
+                <div>
+                    <i class="fas fa-info-circle"></i>
+                    <span>Search across all fields including Student Name, App ID, Passport, Program, and Application Stage</span>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span class="search-results" id="searchResults">Loading applications...</span>
+                    <button class="clear-search" id="clearSearch" onclick="clearSearch()" style="display: none;">Clear Search</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Applications Section -->
+        <div class="applications-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-list"></i>
+                    Applications Report
+                </div>
+            </div>
+            
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <i class="fas fa-spinner"></i>
+                <p>Loading applications from Zoho Creator...</p>
+            </div>
+            
+            <!-- Applications Table -->
+            <table class="applications-table" id="applicationsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>App ID</th>
+                        <th>Full Name</th>
+                        <th>Program</th>
+                        <th>Academic Year</th>
+                        <th>Semester</th>
+                        <th>Degree</th>
+                        <th>Stage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="applicationsTableBody">
+                </tbody>
+            </table>
+            
+            <!-- No Results -->
+            <div class="no-results" id="noResults">
+                <i class="fas fa-search"></i>
+                <h3>No applications found</h3>
+                <p>Try adjusting your search terms or clear the search to see all applications</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let applicationsData = [];
+        let filteredData = [];
+        let currentSearchTerm = '';
+        let isDebugMode = false;
+        
+        // Initialize widget
+        function initWidget() {
+            console.log('Widget initialized');
+            updateDebug('Widget initialized', 'Initialization', 0);
+            
+            // Check if debug mode is enabled (for testing)
+            const urlParams = new URLSearchParams(window.location.search);
+            isDebugMode = urlParams.get('debug') === 'true';
+            
+            if (isDebugMode) {
+                document.getElementById('debugInfo').style.display = 'block';
+            }
+            
+            // Add search event listeners
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.addEventListener('input', handleSearch);
+                searchInput.addEventListener('keyup', handleSearch);
+                searchInput.addEventListener('paste', function() {
+                    setTimeout(handleSearch, 100);
+                });
+            }
+            
+            // Listen for data from parent (Zoho)
+            window.addEventListener('message', handleMessage);
+            
+            // Request data from Zoho or load sample data
+            setTimeout(requestDataFromZoho, 1000);
+        }
+        
+        // Update debug information
+        function updateDebug(status, source, count) {
+            if (isDebugMode) {
+                document.getElementById('debugStatus').textContent = status;
+                document.getElementById('debugSource').textContent = source;
+                document.getElementById('debugCount').textContent = count;
+            }
+        }
+        
+        // Handle messages from parent window (Zoho)
+        function handleMessage(event) {
+            console.log('Received message from parent:', event.data);
+            updateDebug('Message received', 'Zoho Creator', 0);
+            
+            if (event.data && event.data.type === 'APPLICATIONS_DATA') {
+                console.log('Processing applications data:', event.data.applications);
+                applicationsData = event.data.applications || [];
+                filteredData = [...applicationsData];
+                updateDebug('Data loaded', 'Zoho Creator', applicationsData.length);
+                renderApplications();
+                updateSearchResults();
+            }
+        }
+        
+        // Request data from Zoho
+        function requestDataFromZoho() {
+            console.log('Requesting data from Zoho parent window...');
+            updateDebug('Requesting data', 'Zoho Creator', 0);
+            
+            // Send message to parent window asking for data
+            if (window.parent && window.parent !== window) {
+                console.log('Sending request to parent window');
+                window.parent.postMessage({
+                    type: 'REQUEST_APPLICATIONS_DATA'
+                }, '*');
+                
+                // Wait 3 seconds, if no response, load sample data
+                setTimeout(function() {
+                    if (applicationsData.length === 0) {
+                        console.log('No response from parent, loading sample data');
+                        updateDebug('Timeout - loading sample', 'Sample Data', 0);
+                        loadSampleData();
+                    }
+                }, 3000);
+            } else {
+                // If no parent (testing), load sample data immediately
+                console.log('No parent window detected, loading sample data');
+                updateDebug('No parent window', 'Sample Data', 0);
+                loadSampleData();
+            }
+        }
+        
+        // Load sample data for testing
+        function loadSampleData() {
+            console.log('Loading sample data for testing...');
+            
+            applicationsData = [
+                {
+                    id: 1,
+                    appId: 'APP001',
+                    studentName: 'Mohamed Ahmed',
+                    studentId: 'STU001',
+                    passport: 'P123456',
+                    program: 'Computer Science, BS',
+                    degree: 'Bachelor',
+                    academicYear: '2025/2026',
+                    semester: 'Fall',
+                    stage: 'Pending Review',
+                    viewUrl: '#'
+                },
+                {
+                    id: 2,
+                    appId: 'APP002',
+                    studentName: 'Ahmed Ali Hassan',
+                    studentId: 'STU002',
+                    passport: 'P789012',
+                    program: 'Business Administration, MBA',
+                    degree: 'Master',
+                    academicYear: '2025/2026',
+                    semester: 'Spring',
+                    stage: 'Final Acceptance',
+                    viewUrl: '#'
+                },
+                {
+                    id: 3,
+                    appId: 'APP003',
+                    studentName: 'Sara Hassan Mohamed',
+                    studentId: 'STU003',
+                    passport: 'P345678',
+                    program: 'Engineering, MS',
+                    degree: 'Master',
+                    academicYear: '2024/2025',
+                    semester: 'Fall',
+                    stage: 'Awaiting Review',
+                    viewUrl: '#'
+                },
+                {
+                    id: 4,
+                    appId: 'APP004',
+                    studentName: 'Omar Khaled',
+                    studentId: 'STU004',
+                    passport: 'P901234',
+                    program: 'Management, BS',
+                    degree: 'Bachelor',
+                    academicYear: '2025/2026',
+                    semester: 'Fall',
+                    stage: 'Complete',
+                    viewUrl: '#'
+                }
+            ];
+            
+            filteredData = [...applicationsData];
+            updateDebug('Sample data loaded', 'Sample Data', applicationsData.length);
+            renderApplications();
+            updateSearchResults();
+        }
+        
+        // Handle search input
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase().trim();
+            currentSearchTerm = searchTerm;
+            
+            console.log('Searching for:', searchTerm);
+            
+            if (searchTerm === '') {
+                filteredData = [...applicationsData];
+            } else {
+                filteredData = applicationsData.filter(app => {
+                    return (
+                        (app.studentName || '').toLowerCase().includes(searchTerm) ||
+                        (app.appId || '').toLowerCase().includes(searchTerm) ||
+                        (app.passport || '').toLowerCase().includes(searchTerm) ||
+                        (app.program || '').toLowerCase().includes(searchTerm) ||
+                        (app.stage || '').toLowerCase().includes(searchTerm) ||
+                        (app.degree || '').toLowerCase().includes(searchTerm) ||
+                        (app.academicYear || '').toLowerCase().includes(searchTerm) ||
+                        (app.semester || '').toLowerCase().includes(searchTerm)
+                    );
+                });
+            }
+            
+            renderApplications();
+            updateSearchResults();
+            updateClearButton();
+        }
+        
+        // Render applications table
+        function renderApplications() {
+            const tableBody = document.getElementById('applicationsTableBody');
+            const table = document.getElementById('applicationsTable');
+            const loading = document.getElementById('loadingState');
+            const noResults = document.getElementById('noResults');
+            
+            // Hide loading
+            loading.style.display = 'none';
+            
+            if (filteredData.length === 0 && currentSearchTerm !== '') {
+                table.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            if (applicationsData.length === 0) {
+                // Still loading or no data
+                return;
+            }
+            
+            // Show table and hide no results
+            table.style.display = 'table';
+            noResults.style.display = 'none';
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add rows
+            filteredData.forEach(app => {
+                const row = document.createElement('tr');
+                row.className = 'application-row';
+                
+                const stageClass = getStageClass(app.stage || '');
+                
+                row.innerHTML = `
+                    <td>
+                        <span class="app-id-cell">${app.appId || 'N/A'}</span>
+                    </td>
+                    <td>
+                        <div class="student-name">${app.studentName || 'N/A'}</div>
+                        <div class="student-id">ID: ${app.studentId || 'N/A'} | Passport: ${app.passport || 'N/A'}</div>
+                    </td>
+                    <td>
+                        <div class="program-info">${app.program || 'N/A'}</div>
+                    </td>
+                    <td>
+                        <div class="academic-info">
+                            <span class="year-badge">${app.academicYear || 'N/A'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="academic-info">
+                            <span class="semester-badge">${app.semester || 'N/A'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="degree-badge">${app.degree || 'N/A'}</span>
+                    </td>
+                    <td>
+                        <span class="stage-badge ${stageClass}">
+                            <i class="fas fa-circle"></i>
+                            ${app.stage || 'Pending Review'}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="${app.viewUrl || '#'}" class="view-btn" target="_top">
+                            <i class="fas fa-eye"></i>
+                            View
+                        </a>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Get stage CSS class
+        function getStageClass(stage) {
+            const stageLower = stage.toLowerCase();
+            if (stageLower.includes('acceptance') || stageLower.includes('final')) {
+                return 'stage-approved';
+            } else if (stageLower.includes('paid') || stageLower.includes('complete')) {
+                return 'stage-complete';
+            } else if (stageLower.includes('conditional')) {
+                return 'stage-conditional';
+            } else if (stageLower.includes('refused') || stageLower.includes('invalid')) {
+                return 'stage-rejected';
+            } else if (stageLower.includes('review') || stageLower.includes('awaiting')) {
+                return 'stage-review';
+            } else if (stageLower.includes('missing')) {
+                return 'stage-missing';
+            } else if (stageLower.includes('pending')) {
+                return 'stage-pending';
+            }
+            return 'stage-pending';
+        }
+        
+        // Update search results count
+        function updateSearchResults() {
+            const searchResults = document.getElementById('searchResults');
+            if (currentSearchTerm === '') {
+                searchResults.textContent = `Showing ${applicationsData.length} applications`;
+            } else {
+                searchResults.textContent = `Found ${filteredData.length} of ${applicationsData.length} applications`;
+            }
+        }
+        
+        // Update clear button visibility
+        function updateClearButton() {
+            const clearBtn = document.getElementById('clearSearch');
+            clearBtn.style.display = currentSearchTerm === '' ? 'none' : 'inline';
+        }
+        
+        // Clear search
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            searchInput.value = '';
+            currentSearchTerm = '';
+            filteredData = [...applicationsData];
+            renderApplications();
+            updateSearchResults();
+            updateClearButton();
+            searchInput.focus();
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initWidget);
+        
+        // Also initialize immediately (fallback)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initWidget);
+        } else {
+            initWidget();
+        }
+        
+        // Initialize after a short delay (Zoho compatibility)
+        setTimeout(initWidget, 500);
+    </script>
+</body>
+</html>
