@@ -684,59 +684,67 @@
             }
         }
         
-        // Load sample data for testing
+        // Load sample data for testing (ONLY when no real data is available)
         function loadSampleData() {
+            console.log('Loading sample data as fallback...');
+            
+            // Show message that this is sample data
+            const filterInfo = document.getElementById('filterInfo');
+            if (filterInfo) {
+                filterInfo.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Sample Data - Widget not connected to Zoho';
+                filterInfo.style.background = 'rgba(255, 193, 7, 0.2)';
+                filterInfo.style.color = '#f57c00';
+            }
+            
             applicationsData = [
                 {
-                    id: 1,
-                    appId: 'APP001',
-                    studentName: 'Mohamed Ahmed',
-                    studentID: 'STU001',
-                    studentPassport: 'P123456',
-                    programName: 'Computer Science, BS',
-                    degree: 'Bachelor',
+                    id: 'SAMPLE1',
+                    appId: 'SAMPLE-001',
+                    studentName: 'Sample Student 1',
+                    studentID: 'SAMPLE001',
+                    studentPassport: 'SAMPLE123',
+                    programName: 'Sample Program 1',
+                    degree: 'Sample Degree',
                     yearName: '2025/2026',
-                    semesterName: 'Fall',
-                    stage: 'Pending Review',
+                    semesterName: 'Sample Semester',
+                    stage: 'Sample Stage - Not Real Data',
                     viewUrl: '#'
                 },
                 {
-                    id: 2,
-                    appId: 'APP002',
-                    studentName: 'Ahmed Ali Hassan',
-                    studentID: 'STU002',
-                    studentPassport: 'P789012',
-                    programName: 'Business Administration, MBA',
-                    degree: 'Master',
+                    id: 'SAMPLE2',
+                    appId: 'SAMPLE-002',
+                    studentName: 'Sample Student 2',
+                    studentID: 'SAMPLE002',
+                    studentPassport: 'SAMPLE456',
+                    programName: 'Sample Program 2',
+                    degree: 'Sample Degree',
                     yearName: '2025/2026',
-                    semesterName: 'Spring',
-                    stage: 'Final Acceptance',
-                    viewUrl: '#'
-                },
-                {
-                    id: 3,
-                    appId: 'APP003',
-                    studentName: 'Sara Hassan Mohamed',
-                    studentID: 'STU003',
-                    studentPassport: 'P345678',
-                    programName: 'Engineering, MS',
-                    degree: 'Master',
-                    yearName: '2024/2025',
-                    semesterName: 'Fall',
-                    stage: 'Awaiting Review',
+                    semesterName: 'Sample Semester',
+                    stage: 'Sample Stage - Not Real Data',
                     viewUrl: '#'
                 }
             ];
             
+            // Add warning message to each sample record
+            applicationsData.forEach(function(app, index) {
+                app.studentName = '⚠️ SAMPLE: ' + app.studentName;
+                app.programName = '⚠️ SAMPLE: ' + app.programName;
+            });
+            
             filteredData = applicationsData.slice();
             totalApplications = applicationsData.length;
             
-            console.log('Sample data loaded:', totalApplications, 'applications');
-            updateDebug('Sample data loaded', 'Sample Data', totalApplications);
+            console.log('Sample data loaded:', totalApplications, 'SAMPLE applications');
+            updateDebug('Sample data loaded (FALLBACK)', 'Sample Data', totalApplications);
             
             renderApplications();
             updateStats();
             updateSearchResults();
+            
+            // Show warning message to user
+            setTimeout(function() {
+                alert('⚠️ Widget Notice:\n\nThis widget is showing SAMPLE DATA because it\'s not properly connected to Zoho Creator.\n\nTo see real data:\n1. Make sure the widget is embedded in a Zoho Creator page\n2. Add the page script to send real data\n3. The sample data will be replaced automatically');
+            }, 2000);
         }
         
         // Update debug information
