@@ -1,19 +1,19 @@
 <%{
-	// Check user profile and filter applications accordingly
-	input.profile = thisapp.portal.loginUserProfile();
-	input.currentUser = zoho.loginuser;
-	// Fetch applications based on user type
-	if(input.profile == "Active Agent")
-	{
-		// For agents: show only their assigned applications
-		applicationsList = Application_Form[Application_Owner == input.currentUser];
-	}
-	else
-	{
-		// For others: show all applications  
-		applicationsList = Application_Form[ID != null];
-	}
-	%>
+// Check user profile and filter applications accordingly
+input.profile = thisapp.portal.loginUserProfile();
+input.currentUser = zoho.loginuser;
+// Fetch applications based on user type
+if(input.profile == "Active Agent")
+{
+	// For agents: show only their assigned applications
+	applicationsList = Application_Form[Application_Owner == input.currentUser];
+}
+else
+{
+	// For others: show all applications  
+	applicationsList = Application_Form[ID != null];
+}
+}%>
 <head>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<meta charset="UTF-8">
@@ -537,21 +537,21 @@
 					<span class="stat-label">Total Applications</span>
 				</div>
 <%
-	pendingCount = 0;
-	approvedCount = 0;
-	for each  app in applicationsList
+pendingCount = 0;
+approvedCount = 0;
+for each app in applicationsList
+{
+	if(app.Application_Stage.contains("Pending") || app.Application_Stage.contains("Review"))
 	{
-		if(app.Application_Stage.contains("Pending") || app.Application_Stage.contains("Review"))
-		{
-			pendingCount = pendingCount + 1;
-		}
-		if(app.Application_Stage.contains("Acceptance") || app.Application_Stage.contains("Complete"))
-		{
-			approvedCount = approvedCount + 1;
-		}
+		pendingCount = pendingCount + 1;
 	}
-	%>
-<div class="stat-item">
+	if(app.Application_Stage.contains("Acceptance") || app.Application_Stage.contains("Complete"))
+	{
+		approvedCount = approvedCount + 1;
+	}
+}
+%>
+				<div class="stat-item">
 					<span class="stat-number" id="pendingCount"><%=pendingCount%></span>
 					<span class="stat-label">Pending Review</span>
 				</div>
@@ -575,10 +575,7 @@
 					   id="searchInput" 
 					   class="search-input" 
 					   placeholder="Search by Student Name, App ID, Passport, Program, or Stage..."
-					   autocomplete="off"
-					   oninput="filterApplications(this.value)"
-					   onkeyup="filterApplications(this.value)"
-					   onpaste="setTimeout(function(){filterApplications(document.getElementById('searchInput').value)}, 100)">
+					   autocomplete="off">
 				<i class="fas fa-search search-icon"></i>
 			</div>
 			<div class="search-info">
@@ -604,10 +601,10 @@
 				</div>
 			</div>
 <%
-	if(applicationsList.count() > 0)
-	{
-		%>
-<table class="applications-table" id="applicationsTable">
+if(applicationsList.count() > 0)
+{
+%>
+			<table class="applications-table" id="applicationsTable">
 				<thead>
 					<tr>
 						<th>App ID</th>
@@ -622,52 +619,52 @@
 				</thead>
 				<tbody>
 <%
-		counter = 1;
-		for each  app in applicationsList
-		{
-			studentName = if(app.Student_Application != null,app.Student_Application.Full_Name,"N/A");
-			studentID = if(app.Student_Application != null,app.Student_Application.ID,"N/A");
-			studentPassport = if(app.Student_Application != null,app.Student_Application.Passport_No,"N/A");
-			programName = if(app.Application_Program != null,app.Application_Program.Program_Name,"N/A");
-			input.degree = if(app.Degree != null,app.Degree,"N/A");
-			yearName = if(app.Application_Academic_Year != null,app.Application_Academic_Year.Academic_Year,"N/A");
-			semesterName = if(app.Application_Semester != null,app.Application_Semester.Semester_Name,"N/A");
-			input.stage = if(app.Application_Stage != null,app.Application_Stage,"Pending Review");
-			appID = if(app.App_ID != null && app.App_ID != "",app.App_ID,"N/A");
-			// Determine stage class for styling
-			stageClass = "stage-pending";
-			if(input.stage.contains("Acceptance") || input.stage.contains("Final"))
-			{
-				stageClass = "stage-approved";
-			}
-			else if(input.stage.contains("Paid") || input.stage.contains("Complete"))
-			{
-				stageClass = "stage-complete";
-			}
-			else if(input.stage.contains("Conditional"))
-			{
-				stageClass = "stage-conditional";
-			}
-			else if(input.stage.contains("Refused") || input.stage.contains("Invalid"))
-			{
-				stageClass = "stage-rejected";
-			}
-			else if(input.stage.contains("Review") || input.stage.contains("Awaiting"))
-			{
-				stageClass = "stage-review";
-			}
-			else if(input.stage.contains("Missing"))
-			{
-				stageClass = "stage-missing";
-			}
-			%>
-<tr class="application-row" 
+counter = 1;
+for each app in applicationsList
+{
+	studentName = if(app.Student_Application != null,app.Student_Application.Full_Name,"N/A");
+	studentID = if(app.Student_Application != null,app.Student_Application.ID,"N/A");
+	studentPassport = if(app.Student_Application != null,app.Student_Application.Passport_No,"N/A");
+	programName = if(app.Application_Program != null,app.Application_Program.Program_Name,"N/A");
+	degree = if(app.Degree != null,app.Degree,"N/A");
+	yearName = if(app.Application_Academic_Year != null,app.Application_Academic_Year.Academic_Year,"N/A");
+	semesterName = if(app.Application_Semester != null,app.Application_Semester.Semester_Name,"N/A");
+	stage = if(app.Application_Stage != null,app.Application_Stage,"Pending Review");
+	appID = if(app.App_ID != null && app.App_ID != "",app.App_ID,"N/A");
+	// Determine stage class for styling
+	stageClass = "stage-pending";
+	if(stage.contains("Acceptance") || stage.contains("Final"))
+	{
+		stageClass = "stage-approved";
+	}
+	else if(stage.contains("Paid") || stage.contains("Complete"))
+	{
+		stageClass = "stage-complete";
+	}
+	else if(stage.contains("Conditional"))
+	{
+		stageClass = "stage-conditional";
+	}
+	else if(stage.contains("Refused") || stage.contains("Invalid"))
+	{
+		stageClass = "stage-rejected";
+	}
+	else if(stage.contains("Review") || stage.contains("Awaiting"))
+	{
+		stageClass = "stage-review";
+	}
+	else if(stage.contains("Missing"))
+	{
+		stageClass = "stage-missing";
+	}
+%>
+					<tr class="application-row" 
 						data-student-name="<%=studentName%>" 
 						data-app-id="<%=appID%>" 
 						data-passport="<%=studentPassport%>"
 						data-program="<%=programName%>" 
-						data-stage="<%=input.stage%>"
-						data-degree="<%=input.degree%>"
+						data-stage="<%=stage%>"
+						data-degree="<%=degree%>"
 						data-year="<%=yearName%>"
 						data-semester="<%=semesterName%>">
 						<td>
@@ -691,40 +688,40 @@
 							</div>
 						</td>
 						<td>
-							<span class="degree-badge"><%=input.degree%></span>
+							<span class="degree-badge"><%=degree%></span>
 						</td>
 						<td>
 							<span class="stage-badge <%=stageClass%>">
 								<i class="fas fa-circle"></i>
-								<%=input.stage%>
+								<%=stage%>
 							</span>
 						</td>
 						<td class="actions-cell">
 							<a href="
 <%
-			if(input.profile == "Active Agent")
-			{
-				%>
+if(input.profile == "Active Agent")
+{
+%>
 https://agc9mh.zohocreatorportal.com/#page:Application_Details?application_id=<%=app.ID%>
 <%
-			}
-			else
-			{
-				%>
+}
+else
+{
+%>
 https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M28OGgOdzkfyAMqq3nyJNrUaQnWVCmur4d1H8vSPaVJ51Rw6VEr7yxPqN4ye3XyS9C40hw6YmHp39OhF5JbwauPQQZOtmKz51Vvd?application_id=<%=app.ID%>
 <%
-			}
-			%>
-"class="view-btn">
+}
+%>
+" class="view-btn">
 								<i class="fas fa-eye"></i>
 								View
 							</a>
 						</td>
 					</tr>
 <%
-		}
-		%>
-</tbody>
+}
+%>
+				</tbody>
 			</table>
 			
 			<!-- No Search Results Message -->
@@ -734,19 +731,19 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 				<p>Try adjusting your search terms or clear the search to see all applications</p>
 			</div>
 <%
-	}
-	else
-	{
-		%>
-<div class="no-applications">
+}
+else
+{
+%>
+			<div class="no-applications">
 				<i class="fas fa-file-alt"></i>
 				<h3>No Applications Found</h3>
 				<p><%=if(input.profile == "Active Agent","You don't have any assigned applications yet.","No applications have been submitted yet.")%></p>
 			</div>
 <%
-	}
-	%>
-</div>
+}
+%>
+		</div>
 	</div>
 
 	<script>
@@ -754,7 +751,7 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 		var totalApplications = <%=applicationsList.count()%>;
 		var currentSearchTerm = '';
 		
-		// Main filter function - called directly from HTML events
+		// Main filter function
 		function filterApplications(searchTerm) {
 			if (typeof searchTerm !== 'string') searchTerm = '';
 			searchTerm = searchTerm.toLowerCase().trim();
@@ -811,9 +808,9 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 			var searchResults = document.getElementById('searchResults');
 			if (searchResults) {
 				if (searchTerm === '') {
-					searchResults.textContent = 'Showing ' + totalApplications + 'applications';
+					searchResults.textContent = 'Showing ' + totalApplications + ' applications';
 				} else {
-					searchResults.textContent = 'Found ' + visibleCount + 'of ' + totalApplications + 'applications';
+					searchResults.textContent = 'Found ' + visibleCount + ' of ' + totalApplications + ' applications';
 				}
 			}
 		}
@@ -849,13 +846,31 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 			}
 		}
 		
-		// Simple initialization when page loads
-		setTimeout(function() {
+		// Add event listeners when page loads
+		document.addEventListener('DOMContentLoaded', function() {
 			var searchInput = document.getElementById('searchInput');
 			if (searchInput) {
-				searchInput.focus();
+				searchInput.addEventListener('input', function() {
+					filterApplications(this.value);
+				});
+				
+				searchInput.addEventListener('keyup', function() {
+					filterApplications(this.value);
+				});
+				
+				searchInput.addEventListener('paste', function() {
+					var self = this;
+					setTimeout(function() {
+						filterApplications(self.value);
+					}, 100);
+				});
+				
+				// Auto-focus search input
+				setTimeout(function() {
+					searchInput.focus();
+				}, 500);
 			}
-		}, 500);
+		});
 		
 		console.log('All Applications page with search loaded');
 		console.log('User profile: <%=input.profile%>');
@@ -863,6 +878,3 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 	</script>
 </body>
 </html>
-<%
-
-}%>
