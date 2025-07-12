@@ -1,24 +1,10 @@
-<%{
-	// Check user profile and filter applications accordingly
-	input.profile = thisapp.portal.loginUserProfile();
-	input.currentUser = zoho.loginuser;
-	// Fetch applications based on user type
-	if(input.profile == "Active Agent")
-	{
-		// For agents: show only their assigned applications
-		applicationsList = Application_Form[Application_Owner == input.currentUser];
-	}
-	else
-	{
-		// For others: show all applications  
-		applicationsList = Application_Form[ID != null];
-	}
-	%>
+<!DOCTYPE html>
+<html lang="en">
 <head>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>All Applications - AGC</title>
+	<title>All Applications - AGC Widget</title>
 </head>
 
 <style>
@@ -31,23 +17,29 @@
 		font-size: 14px;
 		line-height: 1.5;
 		color: #333333;
+		padding: 20px;
+	}
+	
+	.widget-container {
+		max-width: 100%;
+		margin: 0 auto;
 	}
 	
 	.page-header {
 		background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
 		color: white;
-		padding: 30px 0;
+		padding: 30px;
 		margin-bottom: 30px;
 		box-shadow: 0 4px 20px rgba(17, 62, 104, 0.3);
+		border-radius: 16px;
 	}
 	
 	.page-header .container {
-		max-width: 1400px;
-		margin: 0 auto;
-		padding: 0 30px;
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
+		flex-wrap: wrap;
+		gap: 20px;
 	}
 	
 	.page-title {
@@ -94,12 +86,6 @@
 		opacity: 0.8;
 		text-transform: uppercase;
 		letter-spacing: 0.5px;
-	}
-	
-	.content-container {
-		max-width: 1400px;
-		margin: 0 auto;
-		padding: 0 30px;
 	}
 	
 	.search-section {
@@ -424,30 +410,6 @@
 		font-size: 14px;
 	}
 	
-	.back-button {
-		background: #6c757d;
-		color: white;
-		border: none;
-		padding: 12px 24px;
-		border-radius: 8px;
-		font-size: 14px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		text-decoration: none;
-		margin-bottom: 20px;
-	}
-	
-	.back-button:hover {
-		background: #5a6268;
-		transform: translateY(-1px);
-		color: white;
-		text-decoration: none;
-	}
-	
 	.no-results {
 		text-align: center;
 		padding: 60px 40px;
@@ -472,6 +434,22 @@
 		font-size: 14px;
 	}
 	
+	.loading {
+		text-align: center;
+		padding: 40px;
+		color: #6c757d;
+	}
+	
+	.loading i {
+		font-size: 24px;
+		animation: spin 1s linear infinite;
+	}
+	
+	@keyframes spin {
+		0% { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
+	
 	@media (max-width: 1200px) {
 		.page-header .container {
 			flex-direction: column;
@@ -494,8 +472,8 @@
 	}
 	
 	@media (max-width: 768px) {
-		.content-container {
-			padding: 0 15px;
+		body {
+			padding: 10px;
 		}
 		
 		.search-section {
@@ -518,56 +496,37 @@
 </style>
 
 <body>
-	<div class="page-header">
-		<div class="container">
-			<div class="page-title">
-				<div class="icon">
-					<i class="fas fa-file-alt"></i>
+	<div class="widget-container">
+		<div class="page-header">
+			<div class="container">
+				<div class="page-title">
+					<div class="icon">
+						<i class="fas fa-file-alt"></i>
+					</div>
+					<div>
+						<h1>All Applications</h1>
+						<p style="margin: 0; opacity: 0.8; font-size: 14px;">
+							Applications overview from Zoho Creator
+						</p>
+					</div>
 				</div>
-				<div>
-					<h1>All Applications</h1>
-					<p style="margin: 0; opacity: 0.8; font-size: 14px;">
-						<%=if(input.profile == "Active Agent","Your assigned applications","Complete applications overview")%>
-					</p>
-				</div>
-			</div>
-			<div class="page-stats">
-				<div class="stat-item">
-					<span class="stat-number" id="totalCount"><%=applicationsList.count()%></span>
-					<span class="stat-label">Total Applications</span>
-				</div>
-<%
-	pendingCount = 0;
-	approvedCount = 0;
-	for each  app in applicationsList
-	{
-		if(app.Application_Stage.contains("Pending") || app.Application_Stage.contains("Review"))
-		{
-			pendingCount = pendingCount + 1;
-		}
-		if(app.Application_Stage.contains("Acceptance") || app.Application_Stage.contains("Complete"))
-		{
-			approvedCount = approvedCount + 1;
-		}
-	}
-	%>
-<div class="stat-item">
-					<span class="stat-number" id="pendingCount"><%=pendingCount%></span>
-					<span class="stat-label">Pending Review</span>
-				</div>
-				<div class="stat-item">
-					<span class="stat-number" id="approvedCount"><%=approvedCount%></span>
-					<span class="stat-label">Approved</span>
+				<div class="page-stats">
+					<div class="stat-item">
+						<span class="stat-number" id="totalCount">0</span>
+						<span class="stat-label">Total Applications</span>
+					</div>
+					<div class="stat-item">
+						<span class="stat-number" id="pendingCount">0</span>
+						<span class="stat-label">Pending Review</span>
+					</div>
+					<div class="stat-item">
+						<span class="stat-number" id="approvedCount">0</span>
+						<span class="stat-label">Approved</span>
+					</div>
 				</div>
 			</div>
 		</div>
-	</div>
 
-	<div class="content-container">
-		<a href="#" class="back-button" onclick="history.back()">
-			<i class="fas fa-arrow-left"></i> Back to Dashboard
-		</a>
-		
 		<!-- Search Section -->
 		<div class="search-section">
 			<div class="search-container">
@@ -575,10 +534,7 @@
 					   id="searchInput" 
 					   class="search-input" 
 					   placeholder="Search by Student Name, App ID, Passport, Program, or Stage..."
-					   autocomplete="off"
-					   oninput="filterApplications(this.value)"
-					   onkeyup="filterApplications(this.value)"
-					   onpaste="setTimeout(function(){filterApplications(document.getElementById('searchInput').value)}, 100)">
+					   autocomplete="off">
 				<i class="fas fa-search search-icon"></i>
 			</div>
 			<div class="search-info">
@@ -587,7 +543,7 @@
 					<span>Search across all fields including Student Name, App ID, Passport, Program, and Application Stage</span>
 				</div>
 				<div style="display: flex; gap: 15px; align-items: center;">
-					<span class="search-results" id="searchResults">Showing <%=applicationsList.count()%> applications</span>
+					<span class="search-results" id="searchResults">Loading applications...</span>
 					<button class="clear-search" id="clearSearch" onclick="clearSearch()" style="display: none;">Clear Search</button>
 				</div>
 			</div>
@@ -600,14 +556,17 @@
 					Applications Report
 				</div>
 				<div class="filter-info">
-					<%=if(input.profile == "Active Agent","Filtered by: Your assignments","Showing: All applications")%>
+					Widget Mode - Real-time Data
 				</div>
 			</div>
-<%
-	if(applicationsList.count() > 0)
-	{
-		%>
-<table class="applications-table" id="applicationsTable">
+
+			<!-- Loading State -->
+			<div class="loading" id="loadingState">
+				<i class="fas fa-spinner"></i>
+				<p>Loading applications from Zoho Creator...</p>
+			</div>
+			
+			<table class="applications-table" id="applicationsTable" style="display: none;">
 				<thead>
 					<tr>
 						<th>App ID</th>
@@ -620,111 +579,8 @@
 						<th>Actions</th>
 					</tr>
 				</thead>
-				<tbody>
-<%
-		counter = 1;
-		for each  app in applicationsList
-		{
-			studentName = if(app.Student_Application != null,app.Student_Application.Full_Name,"N/A");
-			studentID = if(app.Student_Application != null,app.Student_Application.ID,"N/A");
-			studentPassport = if(app.Student_Application != null,app.Student_Application.Passport_No,"N/A");
-			programName = if(app.Application_Program != null,app.Application_Program.Program_Name,"N/A");
-			input.degree = if(app.Degree != null,app.Degree,"N/A");
-			yearName = if(app.Application_Academic_Year != null,app.Application_Academic_Year.Academic_Year,"N/A");
-			semesterName = if(app.Application_Semester != null,app.Application_Semester.Semester_Name,"N/A");
-			input.stage = if(app.Application_Stage != null,app.Application_Stage,"Pending Review");
-			appID = if(app.App_ID != null && app.App_ID != "",app.App_ID,"N/A");
-			// Determine stage class for styling
-			stageClass = "stage-pending";
-			if(input.stage.contains("Acceptance") || input.stage.contains("Final"))
-			{
-				stageClass = "stage-approved";
-			}
-			else if(input.stage.contains("Paid") || input.stage.contains("Complete"))
-			{
-				stageClass = "stage-complete";
-			}
-			else if(input.stage.contains("Conditional"))
-			{
-				stageClass = "stage-conditional";
-			}
-			else if(input.stage.contains("Refused") || input.stage.contains("Invalid"))
-			{
-				stageClass = "stage-rejected";
-			}
-			else if(input.stage.contains("Review") || input.stage.contains("Awaiting"))
-			{
-				stageClass = "stage-review";
-			}
-			else if(input.stage.contains("Missing"))
-			{
-				stageClass = "stage-missing";
-			}
-			%>
-<tr class="application-row" 
-						data-student-name="<%=studentName%>" 
-						data-app-id="<%=appID%>" 
-						data-passport="<%=studentPassport%>"
-						data-program="<%=programName%>" 
-						data-stage="<%=input.stage%>"
-						data-degree="<%=input.degree%>"
-						data-year="<%=yearName%>"
-						data-semester="<%=semesterName%>">
-						<td>
-							<span class="app-id-cell"><%=appID%></span>
-						</td>
-						<td>
-							<div class="student-name"><%=studentName%></div>
-							<div class="student-id">ID: <%=studentID%> | Passport: <%=studentPassport%></div>
-						</td>
-						<td>
-							<div class="program-info"><%=programName%></div>
-						</td>
-						<td>
-							<div class="academic-info">
-								<span class="year-badge"><%=yearName%></span>
-							</div>
-						</td>
-						<td>
-							<div class="academic-info">
-								<span class="semester-badge"><%=semesterName%></span>
-							</div>
-						</td>
-						<td>
-							<span class="degree-badge"><%=input.degree%></span>
-						</td>
-						<td>
-							<span class="stage-badge <%=stageClass%>">
-								<i class="fas fa-circle"></i>
-								<%=input.stage%>
-							</span>
-						</td>
-						<td class="actions-cell">
-							<a href="
-<%
-			if(input.profile == "Active Agent")
-			{
-				%>
-https://agc9mh.zohocreatorportal.com/#page:Application_Details?application_id=<%=app.ID%>
-<%
-			}
-			else
-			{
-				%>
-https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M28OGgOdzkfyAMqq3nyJNrUaQnWVCmur4d1H8vSPaVJ51Rw6VEr7yxPqN4ye3XyS9C40hw6YmHp39OhF5JbwauPQQZOtmKz51Vvd?application_id=<%=app.ID%>
-<%
-			}
-			%>
-"class="view-btn">
-								<i class="fas fa-eye"></i>
-								View
-							</a>
-						</td>
-					</tr>
-<%
-		}
-		%>
-</tbody>
+				<tbody id="applicationsTableBody">
+				</tbody>
 			</table>
 			
 			<!-- No Search Results Message -->
@@ -733,58 +589,186 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 				<h3>No applications found</h3>
 				<p>Try adjusting your search terms or clear the search to see all applications</p>
 			</div>
-<%
-	}
-	else
-	{
-		%>
-<div class="no-applications">
+
+			<div class="no-applications" id="noApplications" style="display: none;">
 				<i class="fas fa-file-alt"></i>
 				<h3>No Applications Found</h3>
-				<p><%=if(input.profile == "Active Agent","You don't have any assigned applications yet.","No applications have been submitted yet.")%></p>
+				<p>No applications have been submitted yet.</p>
 			</div>
-<%
-	}
-	%>
-</div>
+		</div>
 	</div>
 
 	<script>
 		// Global variables
-		var totalApplications = <%=applicationsList.count()%>;
+		var applicationsData = [];
+		var filteredData = [];
+		var totalApplications = 0;
 		var currentSearchTerm = '';
 		
-		// Main filter function - called directly from HTML events
+		// Initialize widget and listen for data from parent
+		function initWidget() {
+			console.log('Widget initialized - waiting for data from Zoho Creator');
+			
+			// Add search event listeners
+			var searchInput = document.getElementById('searchInput');
+			if (searchInput) {
+				searchInput.oninput = function() {
+					filterApplications(this.value);
+				};
+				searchInput.onkeyup = function() {
+					filterApplications(this.value);
+				};
+				searchInput.onpaste = function() {
+					var self = this;
+					setTimeout(function() {
+						filterApplications(self.value);
+					}, 100);
+				};
+			}
+			
+			// Listen for data from parent (Zoho Creator)
+			window.addEventListener('message', function(event) {
+				console.log('Received message:', event.data);
+				
+				if (event.data && event.data.type === 'APPLICATIONS_DATA') {
+					applicationsData = event.data.applications || [];
+					filteredData = applicationsData.slice(); // Copy array
+					totalApplications = applicationsData.length;
+					
+					console.log('Loaded', totalApplications, 'applications');
+					renderApplications();
+					updateStats();
+					updateSearchResults();
+				}
+			});
+			
+			// Load sample data if no parent window (for testing)
+			setTimeout(function() {
+				if (applicationsData.length === 0) {
+					console.log('No data received from parent, loading sample data');
+					loadSampleData();
+				}
+			}, 3000);
+			
+			// Auto-focus search input
+			setTimeout(function() {
+				if (searchInput) {
+					searchInput.focus();
+				}
+			}, 500);
+		}
+		
+		// Load sample data (same structure as your original data)
+		function loadSampleData() {
+			applicationsData = [
+				{
+					id: '1',
+					appId: 'APP001',
+					studentName: 'Mohamed Ahmed',
+					studentID: 'STU001',
+					studentPassport: 'P123456',
+					programName: 'Computer Science, BS',
+					degree: 'Bachelor',
+					yearName: '2025/2026',
+					semesterName: 'Fall',
+					stage: 'Pending Review',
+					viewUrl: '#'
+				},
+				{
+					id: '2',
+					appId: 'APP002',
+					studentName: 'Ahmed Ali Hassan',
+					studentID: 'STU002',
+					studentPassport: 'P789012',
+					programName: 'Business Administration, MBA',
+					degree: 'Master',
+					yearName: '2025/2026',
+					semesterName: 'Spring',
+					stage: 'Final Acceptance',
+					viewUrl: '#'
+				},
+				{
+					id: '3',
+					appId: 'APP003',
+					studentName: 'Sara Hassan Mohamed',
+					studentID: 'STU003',
+					studentPassport: 'P345678',
+					programName: 'Engineering, MS',
+					degree: 'Master',
+					yearName: '2024/2025',
+					semesterName: 'Fall',
+					stage: 'Awaiting Review',
+					viewUrl: '#'
+				},
+				{
+					id: '4',
+					appId: 'APP004',
+					studentName: 'Omar Khaled Ahmed',
+					studentID: 'STU004',
+					studentPassport: 'P901234',
+					programName: 'Management, BS',
+					degree: 'Bachelor',
+					yearName: '2025/2026',
+					semesterName: 'Fall',
+					stage: 'Complete',
+					viewUrl: '#'
+				}
+			];
+			
+			filteredData = applicationsData.slice();
+			totalApplications = applicationsData.length;
+			
+			console.log('Sample data loaded:', totalApplications, 'applications');
+			renderApplications();
+			updateStats();
+			updateSearchResults();
+		}
+		
+		// Update statistics
+		function updateStats() {
+			var pendingCount = 0;
+			var approvedCount = 0;
+			
+			for (var i = 0; i < applicationsData.length; i++) {
+				var app = applicationsData[i];
+				var stage = (app.stage || '').toLowerCase();
+				
+				if (stage.indexOf('pending') !== -1 || stage.indexOf('review') !== -1) {
+					pendingCount++;
+				}
+				if (stage.indexOf('acceptance') !== -1 || stage.indexOf('complete') !== -1) {
+					approvedCount++;
+				}
+			}
+			
+			document.getElementById('totalCount').textContent = totalApplications;
+			document.getElementById('pendingCount').textContent = pendingCount;
+			document.getElementById('approvedCount').textContent = approvedCount;
+		}
+		
+		// Main filter function
 		function filterApplications(searchTerm) {
 			if (typeof searchTerm !== 'string') searchTerm = '';
 			searchTerm = searchTerm.toLowerCase().trim();
 			currentSearchTerm = searchTerm;
 			
-			var rows = document.querySelectorAll('.application-row');
-			var visibleCount = 0;
+			console.log('Filtering with term:', searchTerm);
 			
 			if (searchTerm === '') {
-				// Show all rows
-				for (var i = 0; i < rows.length; i++) {
-					rows[i].style.display = '';
-				}
-				visibleCount = totalApplications;
-				showClearButton(false);
-				showNoResults(false);
+				filteredData = applicationsData.slice();
 			} else {
-				// Filter rows
-				for (var i = 0; i < rows.length; i++) {
-					var row = rows[i];
-					var studentName = (row.getAttribute('data-student-name') || '').toLowerCase();
-					var appId = (row.getAttribute('data-app-id') || '').toLowerCase();
-					var passport = (row.getAttribute('data-passport') || '').toLowerCase();
-					var program = (row.getAttribute('data-program') || '').toLowerCase();
-					var stage = (row.getAttribute('data-stage') || '').toLowerCase();
-					var degree = (row.getAttribute('data-degree') || '').toLowerCase();
-					var year = (row.getAttribute('data-year') || '').toLowerCase();
-					var semester = (row.getAttribute('data-semester') || '').toLowerCase();
+				filteredData = [];
+				for (var i = 0; i < applicationsData.length; i++) {
+					var app = applicationsData[i];
+					var studentName = (app.studentName || '').toLowerCase();
+					var appId = (app.appId || '').toLowerCase();
+					var passport = (app.studentPassport || '').toLowerCase();
+					var program = (app.programName || '').toLowerCase();
+					var stage = (app.stage || '').toLowerCase();
+					var degree = (app.degree || '').toLowerCase();
+					var year = (app.yearName || '').toLowerCase();
+					var semester = (app.semesterName || '').toLowerCase();
 					
-					// Check if search term exists in any of the fields
 					if (studentName.indexOf(searchTerm) !== -1 || 
 						appId.indexOf(searchTerm) !== -1 || 
 						passport.indexOf(searchTerm) !== -1 ||
@@ -793,31 +777,106 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 						degree.indexOf(searchTerm) !== -1 ||
 						year.indexOf(searchTerm) !== -1 ||
 						semester.indexOf(searchTerm) !== -1) {
-						row.style.display = '';
-						visibleCount++;
-					} else {
-						row.style.display = 'none';
+						filteredData.push(app);
 					}
 				}
-				showClearButton(true);
-				showNoResults(visibleCount === 0);
 			}
 			
-			// Update search results count
-			updateResultsCount(searchTerm, visibleCount);
+			renderApplications();
+			updateSearchResults();
+			showClearButton(searchTerm !== '');
 		}
 		
-		function updateResultsCount(searchTerm, visibleCount) {
+		// Render applications table
+		function renderApplications() {
+			var tableBody = document.getElementById('applicationsTableBody');
+			var table = document.getElementById('applicationsTable');
+			var loading = document.getElementById('loadingState');
+			var noResults = document.getElementById('noResults');
+			var noApplications = document.getElementById('noApplications');
+			
+			// Hide loading
+			loading.style.display = 'none';
+			
+			if (totalApplications === 0) {
+				table.style.display = 'none';
+				noResults.style.display = 'none';
+				noApplications.style.display = 'block';
+				return;
+			}
+			
+			if (filteredData.length === 0 && currentSearchTerm !== '') {
+				table.style.display = 'none';
+				noResults.style.display = 'block';
+				noApplications.style.display = 'none';
+				return;
+			}
+			
+			// Show table and hide no results
+			table.style.display = 'table';
+			noResults.style.display = 'none';
+			noApplications.style.display = 'none';
+			
+			// Clear existing rows
+			tableBody.innerHTML = '';
+			
+			// Add rows
+			for (var i = 0; i < filteredData.length; i++) {
+				var app = filteredData[i];
+				var row = document.createElement('tr');
+				row.className = 'application-row';
+				
+				var stageClass = getStageClass(app.stage || '');
+				
+				row.innerHTML = 
+					'<td><span class="app-id-cell">' + (app.appId || 'N/A') + '</span></td>' +
+					'<td>' +
+						'<div class="student-name">' + (app.studentName || 'N/A') + '</div>' +
+						'<div class="student-id">ID: ' + (app.studentID || 'N/A') + ' | Passport: ' + (app.studentPassport || 'N/A') + '</div>' +
+					'</td>' +
+					'<td><div class="program-info">' + (app.programName || 'N/A') + '</div></td>' +
+					'<td><div class="academic-info"><span class="year-badge">' + (app.yearName || 'N/A') + '</span></div></td>' +
+					'<td><div class="academic-info"><span class="semester-badge">' + (app.semesterName || 'N/A') + '</span></div></td>' +
+					'<td><span class="degree-badge">' + (app.degree || 'N/A') + '</span></td>' +
+					'<td><span class="stage-badge ' + stageClass + '"><i class="fas fa-circle"></i> ' + (app.stage || 'Pending Review') + '</span></td>' +
+					'<td class="actions-cell"><a href="' + (app.viewUrl || '#') + '" class="view-btn" target="_top"><i class="fas fa-eye"></i> View</a></td>';
+				
+				tableBody.appendChild(row);
+			}
+		}
+		
+		// Get stage CSS class (same logic as your original code)
+		function getStageClass(stage) {
+			var stageLower = stage.toLowerCase();
+			if (stageLower.indexOf('acceptance') !== -1 || stageLower.indexOf('final') !== -1) {
+				return 'stage-approved';
+			} else if (stageLower.indexOf('paid') !== -1 || stageLower.indexOf('complete') !== -1) {
+				return 'stage-complete';
+			} else if (stageLower.indexOf('conditional') !== -1) {
+				return 'stage-conditional';
+			} else if (stageLower.indexOf('refused') !== -1 || stageLower.indexOf('invalid') !== -1) {
+				return 'stage-rejected';
+			} else if (stageLower.indexOf('review') !== -1 || stageLower.indexOf('awaiting') !== -1) {
+				return 'stage-review';
+			} else if (stageLower.indexOf('missing') !== -1) {
+				return 'stage-missing';
+			}
+			return 'stage-pending';
+		}
+		
+		// Update search results count
+		function updateSearchResults() {
 			var searchResults = document.getElementById('searchResults');
 			if (searchResults) {
-				if (searchTerm === '') {
-					searchResults.textContent = 'Showing ' + totalApplications + 'applications';
+				if (currentSearchTerm === '') {
+					searchResults.textContent = 'Showing ' + totalApplications + ' applications';
 				} else {
-					searchResults.textContent = 'Found ' + visibleCount + 'of ' + totalApplications + 'applications';
+					searchResults.textContent = 'Found ' + filteredData.length + ' of ' + totalApplications + ' applications';
 				}
 			}
 		}
 		
+		// Show/hide clear search button
 		function showClearButton(show) {
 			var clearBtn = document.getElementById('clearSearch');
 			if (clearBtn) {
@@ -825,21 +884,7 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 			}
 		}
 		
-		function showNoResults(show) {
-			var noResults = document.getElementById('noResults');
-			var applicationsTable = document.getElementById('applicationsTable');
-			
-			if (noResults && applicationsTable) {
-				if (show) {
-					applicationsTable.style.display = 'none';
-					noResults.style.display = 'block';
-				} else {
-					applicationsTable.style.display = 'table';
-					noResults.style.display = 'none';
-				}
-			}
-		}
-		
+		// Clear search
 		function clearSearch() {
 			var searchInput = document.getElementById('searchInput');
 			if (searchInput) {
@@ -849,20 +894,14 @@ https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M2
 			}
 		}
 		
-		// Simple initialization when page loads
-		setTimeout(function() {
-			var searchInput = document.getElementById('searchInput');
-			if (searchInput) {
-				searchInput.focus();
-			}
-		}, 500);
+		// Initialize when page loads
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', initWidget);
+		} else {
+			initWidget();
+		}
 		
-		console.log('All Applications page with search loaded');
-		console.log('User profile: <%=input.profile%>');
-		console.log('Total applications: <%=applicationsList.count()%>');
+		console.log('Widget script loaded successfully');
 	</script>
 </body>
 </html>
-<%
-
-}%>
