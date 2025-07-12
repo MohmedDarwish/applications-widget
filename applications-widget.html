@@ -28,69 +28,6 @@
             margin: 0 auto;
         }
         
-        .page-header {
-            background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
-            color: white;
-            padding: 30px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 20px rgba(17, 62, 104, 0.3);
-            border-radius: 16px;
-        }
-        
-        .page-header .container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        
-        .page-title {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .page-title h1 {
-            font-size: 28px;
-            font-weight: 800;
-            margin: 0;
-        }
-        
-        .page-title .icon {
-            width: 50px;
-            height: 50px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-        
-        .page-stats {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-number {
-            font-size: 24px;
-            font-weight: 800;
-            display: block;
-        }
-        
-        .stat-label {
-            font-size: 12px;
-            opacity: 0.8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
         .search-section {
             background: white;
             border-radius: 16px;
@@ -143,12 +80,6 @@
             color: #6c757d;
         }
         
-        .search-help {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-        
         .search-results {
             font-weight: 600;
             color: #113e68;
@@ -195,14 +126,6 @@
             letter-spacing: 1px;
         }
         
-        .filter-info {
-            font-size: 13px;
-            opacity: 0.9;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 6px 12px;
-            border-radius: 20px;
-        }
-        
         .applications-table {
             width: 100%;
             border-collapse: collapse;
@@ -218,9 +141,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             border-bottom: 2px solid #e9ecef;
-            position: sticky;
-            top: 0;
-            z-index: 10;
         }
         
         .applications-table td {
@@ -237,7 +157,6 @@
         .applications-table tbody tr:hover {
             background: rgba(17, 62, 104, 0.03);
             transform: translateX(4px);
-            box-shadow: 0 4px 15px rgba(17, 62, 104, 0.08);
         }
         
         .app-id-cell {
@@ -361,10 +280,6 @@
             border: 1px solid rgba(255, 152, 0, 0.3);
         }
         
-        .actions-cell {
-            text-align: center;
-        }
-        
         .view-btn {
             background: linear-gradient(135deg, #113e68, #0d2f4f);
             color: white;
@@ -379,15 +294,26 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            box-shadow: 0 2px 8px rgba(17, 62, 104, 0.2);
         }
         
         .view-btn:hover {
             background: linear-gradient(135deg, #0d2f4f, #0a2640);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(17, 62, 104, 0.3);
             color: white;
             text-decoration: none;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 40px;
+            color: #6c757d;
+            display: none;
+        }
+        
+        .no-results i {
+            font-size: 48px;
+            color: #dee2e6;
+            margin-bottom: 15px;
         }
         
         .loading {
@@ -404,19 +330,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        
-        .no-results {
-            text-align: center;
-            padding: 60px 40px;
-            color: #6c757d;
-            display: none;
-        }
-        
-        .no-results i {
-            font-size: 48px;
-            color: #dee2e6;
-            margin-bottom: 15px;
         }
         
         .debug-info {
@@ -440,6 +353,12 @@
                 padding: 15px;
             }
             
+            .search-info {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
             .applications-table th:nth-child(4),
             .applications-table td:nth-child(4),
             .applications-table th:nth-child(5),
@@ -451,43 +370,13 @@
 </head>
 <body>
     <div class="widget-container">
-        <!-- Debug Info -->
+        <!-- Debug Info (hidden by default) -->
         <div class="debug-info" id="debugInfo">
-            Status: <span id="debugStatus">Initializing...</span><br>
+            Widget Status: <span id="debugStatus">Initializing...</span><br>
             Data Source: <span id="debugSource">Unknown</span><br>
-            Records: <span id="debugCount">0</span>
+            Records Count: <span id="debugCount">0</span>
         </div>
         
-        <div class="page-header">
-            <div class="container">
-                <div class="page-title">
-                    <div class="icon">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
-                    <div>
-                        <h1>All Applications</h1>
-                        <p style="margin: 0; opacity: 0.8; font-size: 14px;">
-                            Applications Widget
-                        </p>
-                    </div>
-                </div>
-                <div class="page-stats">
-                    <div class="stat-item">
-                        <span class="stat-number" id="totalCount">0</span>
-                        <span class="stat-label">Total Applications</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="pendingCount">0</span>
-                        <span class="stat-label">Pending Review</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number" id="approvedCount">0</span>
-                        <span class="stat-label">Approved</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- Search Section -->
         <div class="search-section">
             <div class="search-container">
@@ -499,7 +388,7 @@
                 <i class="fas fa-search search-icon"></i>
             </div>
             <div class="search-info">
-                <div class="search-help">
+                <div>
                     <i class="fas fa-info-circle"></i>
                     <span>Search across all fields including Student Name, App ID, Passport, Program, and Application Stage</span>
                 </div>
@@ -510,23 +399,22 @@
             </div>
         </div>
         
+        <!-- Applications Section -->
         <div class="applications-section">
             <div class="section-header">
                 <div class="section-title">
                     <i class="fas fa-list"></i>
                     Applications Report
                 </div>
-                <div class="filter-info" id="filterInfo">
-                    Widget Mode - Real-time Data
-                </div>
             </div>
-
+            
             <!-- Loading State -->
             <div class="loading" id="loadingState">
                 <i class="fas fa-spinner"></i>
                 <p>Loading applications from Zoho Creator...</p>
             </div>
             
+            <!-- Applications Table -->
             <table class="applications-table" id="applicationsTable" style="display: none;">
                 <thead>
                     <tr>
@@ -544,7 +432,7 @@
                 </tbody>
             </table>
             
-            <!-- No Search Results Message -->
+            <!-- No Results -->
             <div class="no-results" id="noResults">
                 <i class="fas fa-search"></i>
                 <h3>No applications found</h3>
@@ -557,15 +445,15 @@
         // Global variables
         let applicationsData = [];
         let filteredData = [];
-        let totalApplications = 0;
         let currentSearchTerm = '';
         let isDebugMode = false;
         
-        // Initialize widget and listen for data from parent
+        // Initialize widget
         function initWidget() {
-            console.log('Widget initialized - waiting for data from Zoho Creator');
+            console.log('Widget initialized');
+            updateDebug('Widget initialized', 'Initialization', 0);
             
-            // Check if debug mode is enabled
+            // Check if debug mode is enabled (for testing)
             const urlParams = new URLSearchParams(window.location.search);
             isDebugMode = urlParams.get('debug') === 'true';
             
@@ -573,170 +461,21 @@
                 document.getElementById('debugInfo').style.display = 'block';
             }
             
-            updateDebug('Widget initialized', 'Initializing', 0);
-            
             // Add search event listeners
-            setupSearchListeners();
-            
-            // Listen for data from parent (Zoho Creator)
-            window.addEventListener('message', handleParentMessage);
-            
-            // Load sample data if no parent window (for testing)
-            setTimeout(function() {
-                if (applicationsData.length === 0) {
-                    console.log('No data received from parent, loading sample data');
-                    updateDebug('Timeout - loading sample', 'Sample Data', 0);
-                    loadSampleData();
-                }
-            }, 3000);
-            
-            // Auto-focus search input
-            setTimeout(function() {
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) {
-                    searchInput.focus();
-                }
-            }, 500);
-        }
-        
-        // Setup search event listeners
-        function setupSearchListeners() {
             const searchInput = document.getElementById('searchInput');
-            const clearBtn = document.getElementById('clearSearch');
-            
             if (searchInput) {
-                searchInput.addEventListener('input', function() {
-                    filterApplications(this.value);
-                });
-                
-                searchInput.addEventListener('keyup', function() {
-                    filterApplications(this.value);
-                });
-                
+                searchInput.addEventListener('input', handleSearch);
+                searchInput.addEventListener('keyup', handleSearch);
                 searchInput.addEventListener('paste', function() {
-                    const self = this;
-                    setTimeout(function() {
-                        filterApplications(self.value);
-                    }, 100);
+                    setTimeout(handleSearch, 100);
                 });
             }
             
-            if (clearBtn) {
-                clearBtn.addEventListener('click', clearSearch);
-            }
-        }
-        
-        // Handle messages from parent window (Zoho Creator)
-        function handleParentMessage(event) {
-            console.log('Received message from parent:', event.data);
-            updateDebug('Message received', 'Parent Window', 0);
+            // Listen for data from parent (Zoho)
+            window.addEventListener('message', handleMessage);
             
-            if (event.data && event.data.type === 'APPLICATIONS_DATA') {
-                console.log('Processing applications data:', event.data.applications);
-                processApplicationsData(event.data.applications || []);
-            }
-        }
-        
-        // Process applications data from Zoho
-        function processApplicationsData(rawData) {
-            applicationsData = [];
-            
-            rawData.forEach(function(app, index) {
-                try {
-                    // Convert Zoho data structure to widget format
-                    const processedApp = {
-                        id: app.ID || (index + 1),
-                        appId: app.App_ID || 'N/A',
-                        studentName: app.Student_Application ? app.Student_Application.Full_Name : 'N/A',
-                        studentID: app.Student_Application ? app.Student_Application.ID : 'N/A',
-                        studentPassport: app.Student_Application ? app.Student_Application.Passport_No : 'N/A',
-                        programName: app.Application_Program ? app.Application_Program.Program_Name : 'N/A',
-                        degree: app.Degree || 'N/A',
-                        yearName: app.Application_Academic_Year ? app.Application_Academic_Year.Academic_Year : 'N/A',
-                        semesterName: app.Application_Semester ? app.Application_Semester.Semester_Name : 'N/A',
-                        stage: app.Application_Stage || 'Pending Review',
-                        viewUrl: buildViewUrl(app.ID, app.profile)
-                    };
-                    
-                    applicationsData.push(processedApp);
-                } catch (error) {
-                    console.error('Error processing application:', app, error);
-                }
-            });
-            
-            filteredData = applicationsData.slice();
-            totalApplications = applicationsData.length;
-            
-            console.log('Processed', totalApplications, 'applications');
-            updateDebug('Data processed', 'Zoho Creator', totalApplications);
-            
-            renderApplications();
-            updateStats();
-            updateSearchResults();
-        }
-        
-        // Build view URL based on profile
-        function buildViewUrl(applicationId, profile) {
-            if (profile === "Active Agent") {
-                return `https://agc9mh.zohocreatorportal.com/#page:Application_Details?application_id=${applicationId}`;
-            } else {
-                return `https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M28OGgOdzkfyAMqq3nyJNrUaQnWVCmur4d1H8vSPaVJ51Rw6VEr7yxPqN4ye3XyS9C40hw6YmHp39OhF5JbwauPQQZOtmKz51Vvd?application_id=${applicationId}`;
-            }
-        }
-        
-        // Load sample data for testing
-        function loadSampleData() {
-            applicationsData = [
-                {
-                    id: 1,
-                    appId: 'APP001',
-                    studentName: 'Mohamed Ahmed',
-                    studentID: 'STU001',
-                    studentPassport: 'P123456',
-                    programName: 'Computer Science, BS',
-                    degree: 'Bachelor',
-                    yearName: '2025/2026',
-                    semesterName: 'Fall',
-                    stage: 'Pending Review',
-                    viewUrl: '#'
-                },
-                {
-                    id: 2,
-                    appId: 'APP002',
-                    studentName: 'Ahmed Ali Hassan',
-                    studentID: 'STU002',
-                    studentPassport: 'P789012',
-                    programName: 'Business Administration, MBA',
-                    degree: 'Master',
-                    yearName: '2025/2026',
-                    semesterName: 'Spring',
-                    stage: 'Final Acceptance',
-                    viewUrl: '#'
-                },
-                {
-                    id: 3,
-                    appId: 'APP003',
-                    studentName: 'Sara Hassan Mohamed',
-                    studentID: 'STU003',
-                    studentPassport: 'P345678',
-                    programName: 'Engineering, MS',
-                    degree: 'Master',
-                    yearName: '2024/2025',
-                    semesterName: 'Fall',
-                    stage: 'Awaiting Review',
-                    viewUrl: '#'
-                }
-            ];
-            
-            filteredData = applicationsData.slice();
-            totalApplications = applicationsData.length;
-            
-            console.log('Sample data loaded:', totalApplications, 'applications');
-            updateDebug('Sample data loaded', 'Sample Data', totalApplications);
-            
-            renderApplications();
-            updateStats();
-            updateSearchResults();
+            // Request data from Zoho or load sample data
+            setTimeout(requestDataFromZoho, 1000);
         }
         
         // Update debug information
@@ -748,62 +487,141 @@
             }
         }
         
-        // Update statistics
-        function updateStats() {
-            let pendingCount = 0;
-            let approvedCount = 0;
+        // Handle messages from parent window (Zoho)
+        function handleMessage(event) {
+            console.log('Received message from parent:', event.data);
+            updateDebug('Message received', 'Zoho Creator', 0);
             
-            applicationsData.forEach(function(app) {
-                const stage = (app.stage || '').toLowerCase();
-                
-                if (stage.includes('pending') || stage.includes('review')) {
-                    pendingCount++;
-                }
-                if (stage.includes('acceptance') || stage.includes('complete')) {
-                    approvedCount++;
-                }
-            });
-            
-            document.getElementById('totalCount').textContent = totalApplications;
-            document.getElementById('pendingCount').textContent = pendingCount;
-            document.getElementById('approvedCount').textContent = approvedCount;
+            if (event.data && event.data.type === 'APPLICATIONS_DATA') {
+                console.log('Processing applications data:', event.data.applications);
+                applicationsData = event.data.applications || [];
+                filteredData = [...applicationsData];
+                updateDebug('Data loaded', 'Zoho Creator', applicationsData.length);
+                renderApplications();
+                updateSearchResults();
+            }
         }
         
-        // Main filter function
-        function filterApplications(searchTerm) {
-            if (typeof searchTerm !== 'string') searchTerm = '';
-            searchTerm = searchTerm.toLowerCase().trim();
+        // Request data from Zoho
+        function requestDataFromZoho() {
+            console.log('Requesting data from Zoho parent window...');
+            updateDebug('Requesting data', 'Zoho Creator', 0);
+            
+            // Send message to parent window asking for data
+            if (window.parent && window.parent !== window) {
+                console.log('Sending request to parent window');
+                window.parent.postMessage({
+                    type: 'REQUEST_APPLICATIONS_DATA'
+                }, '*');
+                
+                // Wait 3 seconds, if no response, load sample data
+                setTimeout(function() {
+                    if (applicationsData.length === 0) {
+                        console.log('No response from parent, loading sample data');
+                        updateDebug('Timeout - loading sample', 'Sample Data', 0);
+                        loadSampleData();
+                    }
+                }, 3000);
+            } else {
+                // If no parent (testing), load sample data immediately
+                console.log('No parent window detected, loading sample data');
+                updateDebug('No parent window', 'Sample Data', 0);
+                loadSampleData();
+            }
+        }
+        
+        // Load sample data for testing
+        function loadSampleData() {
+            console.log('Loading sample data for testing...');
+            
+            applicationsData = [
+                {
+                    id: 1,
+                    appId: 'APP001',
+                    studentName: 'Mohamed Ahmed',
+                    studentId: 'STU001',
+                    passport: 'P123456',
+                    program: 'Computer Science, BS',
+                    degree: 'Bachelor',
+                    academicYear: '2025/2026',
+                    semester: 'Fall',
+                    stage: 'Pending Review',
+                    viewUrl: '#'
+                },
+                {
+                    id: 2,
+                    appId: 'APP002',
+                    studentName: 'Ahmed Ali Hassan',
+                    studentId: 'STU002',
+                    passport: 'P789012',
+                    program: 'Business Administration, MBA',
+                    degree: 'Master',
+                    academicYear: '2025/2026',
+                    semester: 'Spring',
+                    stage: 'Final Acceptance',
+                    viewUrl: '#'
+                },
+                {
+                    id: 3,
+                    appId: 'APP003',
+                    studentName: 'Sara Hassan Mohamed',
+                    studentId: 'STU003',
+                    passport: 'P345678',
+                    program: 'Engineering, MS',
+                    degree: 'Master',
+                    academicYear: '2024/2025',
+                    semester: 'Fall',
+                    stage: 'Awaiting Review',
+                    viewUrl: '#'
+                },
+                {
+                    id: 4,
+                    appId: 'APP004',
+                    studentName: 'Omar Khaled',
+                    studentId: 'STU004',
+                    passport: 'P901234',
+                    program: 'Management, BS',
+                    degree: 'Bachelor',
+                    academicYear: '2025/2026',
+                    semester: 'Fall',
+                    stage: 'Complete',
+                    viewUrl: '#'
+                }
+            ];
+            
+            filteredData = [...applicationsData];
+            updateDebug('Sample data loaded', 'Sample Data', applicationsData.length);
+            renderApplications();
+            updateSearchResults();
+        }
+        
+        // Handle search input
+        function handleSearch(event) {
+            const searchTerm = event.target.value.toLowerCase().trim();
             currentSearchTerm = searchTerm;
             
-            console.log('Filtering with term:', searchTerm);
+            console.log('Searching for:', searchTerm);
             
             if (searchTerm === '') {
-                filteredData = applicationsData.slice();
+                filteredData = [...applicationsData];
             } else {
-                filteredData = applicationsData.filter(function(app) {
-                    const studentName = (app.studentName || '').toLowerCase();
-                    const appId = (app.appId || '').toLowerCase();
-                    const passport = (app.studentPassport || '').toLowerCase();
-                    const program = (app.programName || '').toLowerCase();
-                    const stage = (app.stage || '').toLowerCase();
-                    const degree = (app.degree || '').toLowerCase();
-                    const year = (app.yearName || '').toLowerCase();
-                    const semester = (app.semesterName || '').toLowerCase();
-                    
-                    return studentName.includes(searchTerm) || 
-                           appId.includes(searchTerm) || 
-                           passport.includes(searchTerm) ||
-                           program.includes(searchTerm) || 
-                           stage.includes(searchTerm) ||
-                           degree.includes(searchTerm) ||
-                           year.includes(searchTerm) ||
-                           semester.includes(searchTerm);
+                filteredData = applicationsData.filter(app => {
+                    return (
+                        (app.studentName || '').toLowerCase().includes(searchTerm) ||
+                        (app.appId || '').toLowerCase().includes(searchTerm) ||
+                        (app.passport || '').toLowerCase().includes(searchTerm) ||
+                        (app.program || '').toLowerCase().includes(searchTerm) ||
+                        (app.stage || '').toLowerCase().includes(searchTerm) ||
+                        (app.degree || '').toLowerCase().includes(searchTerm) ||
+                        (app.academicYear || '').toLowerCase().includes(searchTerm) ||
+                        (app.semester || '').toLowerCase().includes(searchTerm)
+                    );
                 });
             }
             
             renderApplications();
             updateSearchResults();
-            showClearButton(searchTerm !== '');
+            updateClearButton();
         }
         
         // Render applications table
@@ -816,15 +634,14 @@
             // Hide loading
             loading.style.display = 'none';
             
-            if (totalApplications === 0) {
-                table.style.display = 'none';
-                noResults.style.display = 'none';
-                return;
-            }
-            
             if (filteredData.length === 0 && currentSearchTerm !== '') {
                 table.style.display = 'none';
                 noResults.style.display = 'block';
+                return;
+            }
+            
+            if (applicationsData.length === 0) {
+                // Still loading or no data
                 return;
             }
             
@@ -836,30 +653,55 @@
             tableBody.innerHTML = '';
             
             // Add rows
-            filteredData.forEach(function(app) {
+            filteredData.forEach(app => {
                 const row = document.createElement('tr');
                 row.className = 'application-row';
                 
                 const stageClass = getStageClass(app.stage || '');
                 
-                row.innerHTML = 
-                    '<td><span class="app-id-cell">' + (app.appId || 'N/A') + '</span></td>' +
-                    '<td>' +
-                        '<div class="student-name">' + (app.studentName || 'N/A') + '</div>' +
-                        '<div class="student-id">ID: ' + (app.studentID || 'N/A') + ' | Passport: ' + (app.studentPassport || 'N/A') + '</div>' +
-                    '</td>' +
-                    '<td><div class="program-info">' + (app.programName || 'N/A') + '</div></td>' +
-                    '<td><div class="academic-info"><span class="year-badge">' + (app.yearName || 'N/A') + '</span></div></td>' +
-                    '<td><div class="academic-info"><span class="semester-badge">' + (app.semesterName || 'N/A') + '</span></div></td>' +
-                    '<td><span class="degree-badge">' + (app.degree || 'N/A') + '</span></td>' +
-                    '<td><span class="stage-badge ' + stageClass + '"><i class="fas fa-circle"></i> ' + (app.stage || 'Pending Review') + '</span></td>' +
-                    '<td class="actions-cell"><a href="' + (app.viewUrl || '#') + '" class="view-btn" target="_top"><i class="fas fa-eye"></i> View</a></td>';
+                row.innerHTML = `
+                    <td>
+                        <span class="app-id-cell">${app.appId || 'N/A'}</span>
+                    </td>
+                    <td>
+                        <div class="student-name">${app.studentName || 'N/A'}</div>
+                        <div class="student-id">ID: ${app.studentId || 'N/A'} | Passport: ${app.passport || 'N/A'}</div>
+                    </td>
+                    <td>
+                        <div class="program-info">${app.program || 'N/A'}</div>
+                    </td>
+                    <td>
+                        <div class="academic-info">
+                            <span class="year-badge">${app.academicYear || 'N/A'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="academic-info">
+                            <span class="semester-badge">${app.semester || 'N/A'}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="degree-badge">${app.degree || 'N/A'}</span>
+                    </td>
+                    <td>
+                        <span class="stage-badge ${stageClass}">
+                            <i class="fas fa-circle"></i>
+                            ${app.stage || 'Pending Review'}
+                        </span>
+                    </td>
+                    <td>
+                        <a href="${app.viewUrl || '#'}" class="view-btn" target="_top">
+                            <i class="fas fa-eye"></i>
+                            View
+                        </a>
+                    </td>
+                `;
                 
                 tableBody.appendChild(row);
             });
         }
         
-        // Get stage CSS class (same logic as your original code)
+        // Get stage CSS class
         function getStageClass(stage) {
             const stageLower = stage.toLowerCase();
             if (stageLower.includes('acceptance') || stageLower.includes('final')) {
@@ -874,6 +716,8 @@
                 return 'stage-review';
             } else if (stageLower.includes('missing')) {
                 return 'stage-missing';
+            } else if (stageLower.includes('pending')) {
+                return 'stage-pending';
             }
             return 'stage-pending';
         }
@@ -881,31 +725,29 @@
         // Update search results count
         function updateSearchResults() {
             const searchResults = document.getElementById('searchResults');
-            if (searchResults) {
-                if (currentSearchTerm === '') {
-                    searchResults.textContent = 'Showing ' + totalApplications + ' applications';
-                } else {
-                    searchResults.textContent = 'Found ' + filteredData.length + ' of ' + totalApplications + ' applications';
-                }
+            if (currentSearchTerm === '') {
+                searchResults.textContent = `Showing ${applicationsData.length} applications`;
+            } else {
+                searchResults.textContent = `Found ${filteredData.length} of ${applicationsData.length} applications`;
             }
         }
         
-        // Show/hide clear search button
-        function showClearButton(show) {
+        // Update clear button visibility
+        function updateClearButton() {
             const clearBtn = document.getElementById('clearSearch');
-            if (clearBtn) {
-                clearBtn.style.display = show ? 'inline' : 'none';
-            }
+            clearBtn.style.display = currentSearchTerm === '' ? 'none' : 'inline';
         }
         
         // Clear search
         function clearSearch() {
             const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-                searchInput.value = '';
-                filterApplications('');
-                searchInput.focus();
-            }
+            searchInput.value = '';
+            currentSearchTerm = '';
+            filteredData = [...applicationsData];
+            renderApplications();
+            updateSearchResults();
+            updateClearButton();
+            searchInput.focus();
         }
         
         // Initialize when page loads
@@ -918,7 +760,8 @@
             initWidget();
         }
         
-        console.log('Widget script loaded successfully');
+        // Initialize after a short delay (Zoho compatibility)
+        setTimeout(initWidget, 500);
     </script>
 </body>
 </html>
