@@ -1,880 +1,924 @@
-<%{
-// Check user profile and filter applications accordingly
-input.profile = thisapp.portal.loginUserProfile();
-input.currentUser = zoho.loginuser;
-// Fetch applications based on user type
-if(input.profile == "Active Agent")
-{
-	// For agents: show only their assigned applications
-	applicationsList = Application_Form[Application_Owner == input.currentUser];
-}
-else
-{
-	// For others: show all applications  
-	applicationsList = Application_Form[ID != null];
-}
-}%>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>All Applications - AGC</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applications Search Widget</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8f9fa;
+            font-size: 14px;
+            line-height: 1.5;
+            color: #333333;
+            padding: 20px;
+        }
+        
+        .widget-container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
+            color: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(17, 62, 104, 0.3);
+            border-radius: 16px;
+        }
+        
+        .page-header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .page-title h1 {
+            font-size: 28px;
+            font-weight: 800;
+            margin: 0;
+        }
+        
+        .page-title .icon {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        
+        .page-stats {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: 800;
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .search-section {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .search-container {
+            position: relative;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 16px 50px 16px 20px;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 16px;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #113e68;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(17, 62, 104, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 18px;
+            pointer-events: none;
+        }
+        
+        .search-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 13px;
+            color: #6c757d;
+        }
+        
+        .search-help {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .search-results {
+            font-weight: 600;
+            color: #113e68;
+        }
+        
+        .clear-search {
+            background: none;
+            border: none;
+            color: #113e68;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: underline;
+            padding: 0;
+        }
+        
+        .clear-search:hover {
+            color: #0d2f4f;
+        }
+        
+        .applications-section {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
+            color: white;
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .filter-info {
+            font-size: 13px;
+            opacity: 0.9;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+        
+        .applications-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .applications-table th {
+            background: #f8f9fa;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 13px;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e9ecef;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .applications-table td {
+            padding: 20px;
+            border-bottom: 1px solid #f1f3f4;
+            vertical-align: middle;
+            font-size: 14px;
+        }
+        
+        .applications-table tbody tr {
+            transition: all 0.2s ease;
+        }
+        
+        .applications-table tbody tr:hover {
+            background: rgba(17, 62, 104, 0.03);
+            transform: translateX(4px);
+            box-shadow: 0 4px 15px rgba(17, 62, 104, 0.08);
+        }
+        
+        .app-id-cell {
+            font-family: 'Monaco', 'Consolas', monospace;
+            font-size: 12px;
+            color: #6c757d;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .student-name {
+            font-weight: 600;
+            color: #113e68;
+            margin-bottom: 2px;
+        }
+        
+        .student-id {
+            font-size: 11px;
+            color: #6c757d;
+        }
+        
+        .program-info {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .academic-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .year-badge {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            width: fit-content;
+        }
+        
+        .semester-badge {
+            background: #f3e5f5;
+            color: #7b1fa2;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            width: fit-content;
+            margin-top: 2px;
+        }
+        
+        .degree-badge {
+            background: #e8f5e8;
+            color: #2e7d32;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        
+        .stage-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+        }
+        
+        .stage-pending {
+            background: rgba(255, 193, 7, 0.15);
+            color: #f57c00;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+        
+        .stage-approved {
+            background: rgba(59, 178, 144, 0.15);
+            color: #3bb290;
+            border: 1px solid rgba(59, 178, 144, 0.3);
+        }
+        
+        .stage-rejected {
+            background: rgba(244, 67, 54, 0.15);
+            color: #f44336;
+            border: 1px solid rgba(244, 67, 54, 0.3);
+        }
+        
+        .stage-review {
+            background: rgba(156, 39, 176, 0.15);
+            color: #7b1fa2;
+            border: 1px solid rgba(156, 39, 176, 0.3);
+        }
+        
+        .stage-conditional {
+            background: rgba(255, 152, 0, 0.15);
+            color: #f57c00;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .stage-complete {
+            background: rgba(59, 178, 144, 0.15);
+            color: #3bb290;
+            border: 1px solid rgba(59, 178, 144, 0.3);
+        }
+        
+        .stage-missing {
+            background: rgba(255, 152, 0, 0.15);
+            color: #ff9800;
+            border: 1px solid rgba(255, 152, 0, 0.3);
+        }
+        
+        .actions-cell {
+            text-align: center;
+        }
+        
+        .view-btn {
+            background: linear-gradient(135deg, #113e68, #0d2f4f);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(17, 62, 104, 0.2);
+        }
+        
+        .view-btn:hover {
+            background: linear-gradient(135deg, #0d2f4f, #0a2640);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(17, 62, 104, 0.3);
+            color: white;
+            text-decoration: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .loading i {
+            font-size: 24px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 60px 40px;
+            color: #6c757d;
+            display: none;
+        }
+        
+        .no-results i {
+            font-size: 48px;
+            color: #dee2e6;
+            margin-bottom: 15px;
+        }
+        
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-size: 12px;
+            color: #6c757d;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .search-section {
+                padding: 15px;
+            }
+            
+            .applications-table th:nth-child(4),
+            .applications-table td:nth-child(4),
+            .applications-table th:nth-child(5),
+            .applications-table td:nth-child(5) {
+                display: none;
+            }
+        }
+    </style>
 </head>
-
-<style>
-	@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-	
-	body {
-		margin: 0;
-		font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-		background: #f8f9fa;
-		font-size: 14px;
-		line-height: 1.5;
-		color: #333333;
-	}
-	
-	.page-header {
-		background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
-		color: white;
-		padding: 30px 0;
-		margin-bottom: 30px;
-		box-shadow: 0 4px 20px rgba(17, 62, 104, 0.3);
-	}
-	
-	.page-header .container {
-		max-width: 1400px;
-		margin: 0 auto;
-		padding: 0 30px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	
-	.page-title {
-		display: flex;
-		align-items: center;
-		gap: 15px;
-	}
-	
-	.page-title h1 {
-		font-size: 28px;
-		font-weight: 800;
-		margin: 0;
-	}
-	
-	.page-title .icon {
-		width: 50px;
-		height: 50px;
-		background: rgba(255, 255, 255, 0.2);
-		border-radius: 12px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 20px;
-	}
-	
-	.page-stats {
-		display: flex;
-		gap: 30px;
-		align-items: center;
-	}
-	
-	.stat-item {
-		text-align: center;
-	}
-	
-	.stat-number {
-		font-size: 24px;
-		font-weight: 800;
-		display: block;
-	}
-	
-	.stat-label {
-		font-size: 12px;
-		opacity: 0.8;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-	}
-	
-	.content-container {
-		max-width: 1400px;
-		margin: 0 auto;
-		padding: 0 30px;
-	}
-	
-	.search-section {
-		background: white;
-		border-radius: 16px;
-		padding: 25px;
-		margin-bottom: 25px;
-		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-		border: 1px solid #e0e0e0;
-	}
-	
-	.search-container {
-		position: relative;
-		max-width: 600px;
-		margin: 0 auto;
-	}
-	
-	.search-input {
-		width: 100%;
-		padding: 16px 50px 16px 20px;
-		border: 2px solid #e9ecef;
-		border-radius: 12px;
-		font-size: 16px;
-		font-family: 'Inter', sans-serif;
-		transition: all 0.3s ease;
-		background: #f8f9fa;
-	}
-	
-	.search-input:focus {
-		outline: none;
-		border-color: #113e68;
-		background: white;
-		box-shadow: 0 0 0 3px rgba(17, 62, 104, 0.1);
-	}
-	
-	.search-icon {
-		position: absolute;
-		right: 18px;
-		top: 50%;
-		transform: translateY(-50%);
-		color: #6c757d;
-		font-size: 18px;
-		pointer-events: none;
-	}
-	
-	.search-info {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		margin-top: 15px;
-		font-size: 13px;
-		color: #6c757d;
-	}
-	
-	.search-help {
-		display: flex;
-		align-items: center;
-		gap: 5px;
-	}
-	
-	.search-results {
-		font-weight: 600;
-		color: #113e68;
-	}
-	
-	.clear-search {
-		background: none;
-		border: none;
-		color: #113e68;
-		cursor: pointer;
-		font-size: 13px;
-		text-decoration: underline;
-		padding: 0;
-	}
-	
-	.clear-search:hover {
-		color: #0d2f4f;
-	}
-	
-	.applications-section {
-		background: white;
-		border-radius: 16px;
-		overflow: hidden;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-		border: 1px solid #e0e0e0;
-	}
-	
-	.section-header {
-		background: linear-gradient(135deg, #113e68 0%, #0d2f4f 100%);
-		color: white;
-		padding: 20px 30px;
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-	
-	.section-title {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		font-size: 16px;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 1px;
-	}
-	
-	.filter-info {
-		font-size: 13px;
-		opacity: 0.9;
-		background: rgba(255, 255, 255, 0.1);
-		padding: 6px 12px;
-		border-radius: 20px;
-	}
-	
-	.applications-table {
-		width: 100%;
-		border-collapse: collapse;
-	}
-	
-	.applications-table th {
-		background: #f8f9fa;
-		padding: 18px 20px;
-		text-align: left;
-		font-weight: 700;
-		font-size: 13px;
-		color: #555;
-		text-transform: uppercase;
-		letter-spacing: 0.5px;
-		border-bottom: 2px solid #e9ecef;
-		position: sticky;
-		top: 0;
-		z-index: 10;
-	}
-	
-	.applications-table td {
-		padding: 20px;
-		border-bottom: 1px solid #f1f3f4;
-		vertical-align: middle;
-		font-size: 14px;
-	}
-	
-	.applications-table tbody tr {
-		transition: all 0.2s ease;
-	}
-	
-	.applications-table tbody tr:hover {
-		background: rgba(17, 62, 104, 0.03);
-		transform: translateX(4px);
-		box-shadow: 0 4px 15px rgba(17, 62, 104, 0.08);
-	}
-	
-	.app-id-cell {
-		font-family: 'Monaco', 'Consolas', monospace;
-		font-size: 12px;
-		color: #6c757d;
-		background: #f8f9fa;
-		padding: 4px 8px;
-		border-radius: 4px;
-		display: inline-block;
-	}
-	
-	.student-name {
-		font-weight: 600;
-		color: #113e68;
-		margin-bottom: 2px;
-	}
-	
-	.student-id {
-		font-size: 11px;
-		color: #6c757d;
-	}
-	
-	.program-info {
-		font-weight: 600;
-		color: #333;
-	}
-	
-	.academic-info {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-	
-	.year-badge {
-		background: #e3f2fd;
-		color: #1976d2;
-		padding: 3px 8px;
-		border-radius: 12px;
-		font-size: 11px;
-		font-weight: 600;
-		display: inline-block;
-		width: fit-content;
-	}
-	
-	.semester-badge {
-		background: #f3e5f5;
-		color: #7b1fa2;
-		padding: 3px 8px;
-		border-radius: 12px;
-		font-size: 11px;
-		font-weight: 600;
-		display: inline-block;
-		width: fit-content;
-		margin-top: 2px;
-	}
-	
-	.degree-badge {
-		background: #e8f5e8;
-		color: #2e7d32;
-		padding: 4px 10px;
-		border-radius: 15px;
-		font-size: 12px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.3px;
-	}
-	
-	.stage-badge {
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		padding: 8px 12px;
-		border-radius: 20px;
-		font-size: 12px;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.3px;
-		white-space: nowrap;
-	}
-	
-	.stage-pending {
-		background: rgba(255, 193, 7, 0.15);
-		color: #f57c00;
-		border: 1px solid rgba(255, 193, 7, 0.3);
-	}
-	
-	.stage-approved {
-		background: rgba(59, 178, 144, 0.15);
-		color: #3bb290;
-		border: 1px solid rgba(59, 178, 144, 0.3);
-	}
-	
-	.stage-rejected {
-		background: rgba(244, 67, 54, 0.15);
-		color: #f44336;
-		border: 1px solid rgba(244, 67, 54, 0.3);
-	}
-	
-	.stage-review {
-		background: rgba(156, 39, 176, 0.15);
-		color: #7b1fa2;
-		border: 1px solid rgba(156, 39, 176, 0.3);
-	}
-	
-	.stage-conditional {
-		background: rgba(255, 152, 0, 0.15);
-		color: #f57c00;
-		border: 1px solid rgba(255, 152, 0, 0.3);
-	}
-	
-	.stage-complete {
-		background: rgba(59, 178, 144, 0.15);
-		color: #3bb290;
-		border: 1px solid rgba(59, 178, 144, 0.3);
-	}
-	
-	.stage-missing {
-		background: rgba(255, 152, 0, 0.15);
-		color: #ff9800;
-		border: 1px solid rgba(255, 152, 0, 0.3);
-	}
-	
-	.actions-cell {
-		text-align: center;
-	}
-	
-	.view-btn {
-		background: linear-gradient(135deg, #113e68, #0d2f4f);
-		color: white;
-		border: none;
-		padding: 8px 16px;
-		border-radius: 8px;
-		font-size: 12px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		text-decoration: none;
-		display: inline-flex;
-		align-items: center;
-		gap: 6px;
-		box-shadow: 0 2px 8px rgba(17, 62, 104, 0.2);
-	}
-	
-	.view-btn:hover {
-		background: linear-gradient(135deg, #0d2f4f, #0a2640);
-		transform: translateY(-2px);
-		box-shadow: 0 6px 20px rgba(17, 62, 104, 0.3);
-		color: white;
-		text-decoration: none;
-	}
-	
-	.no-applications {
-		text-align: center;
-		padding: 80px 40px;
-		color: #6c757d;
-	}
-	
-	.no-applications i {
-		font-size: 64px;
-		color: #dee2e6;
-		margin-bottom: 20px;
-	}
-	
-	.no-applications h3 {
-		color: #495057;
-		margin-bottom: 10px;
-		font-size: 20px;
-	}
-	
-	.no-applications p {
-		margin: 0;
-		font-size: 14px;
-	}
-	
-	.back-button {
-		background: #6c757d;
-		color: white;
-		border: none;
-		padding: 12px 24px;
-		border-radius: 8px;
-		font-size: 14px;
-		font-weight: 600;
-		cursor: pointer;
-		transition: all 0.3s ease;
-		display: inline-flex;
-		align-items: center;
-		gap: 8px;
-		text-decoration: none;
-		margin-bottom: 20px;
-	}
-	
-	.back-button:hover {
-		background: #5a6268;
-		transform: translateY(-1px);
-		color: white;
-		text-decoration: none;
-	}
-	
-	.no-results {
-		text-align: center;
-		padding: 60px 40px;
-		color: #6c757d;
-		display: none;
-	}
-	
-	.no-results i {
-		font-size: 48px;
-		color: #dee2e6;
-		margin-bottom: 15px;
-	}
-	
-	.no-results h3 {
-		color: #495057;
-		margin-bottom: 8px;
-		font-size: 18px;
-	}
-	
-	.no-results p {
-		margin: 0;
-		font-size: 14px;
-	}
-	
-	@media (max-width: 1200px) {
-		.page-header .container {
-			flex-direction: column;
-			gap: 20px;
-			text-align: center;
-		}
-		
-		.page-stats {
-			justify-content: center;
-		}
-		
-		.applications-table {
-			font-size: 12px;
-		}
-		
-		.applications-table th,
-		.applications-table td {
-			padding: 12px 8px;
-		}
-	}
-	
-	@media (max-width: 768px) {
-		.content-container {
-			padding: 0 15px;
-		}
-		
-		.search-section {
-			padding: 20px 15px;
-		}
-		
-		.search-info {
-			flex-direction: column;
-			gap: 10px;
-			text-align: center;
-		}
-		
-		.applications-table th:nth-child(4),
-		.applications-table td:nth-child(4),
-		.applications-table th:nth-child(5),
-		.applications-table td:nth-child(5) {
-			display: none;
-		}
-	}
-</style>
-
 <body>
-	<div class="page-header">
-		<div class="container">
-			<div class="page-title">
-				<div class="icon">
-					<i class="fas fa-file-alt"></i>
-				</div>
-				<div>
-					<h1>All Applications</h1>
-					<p style="margin: 0; opacity: 0.8; font-size: 14px;">
-						<%=if(input.profile == "Active Agent","Your assigned applications","Complete applications overview")%>
-					</p>
-				</div>
-			</div>
-			<div class="page-stats">
-				<div class="stat-item">
-					<span class="stat-number" id="totalCount"><%=applicationsList.count()%></span>
-					<span class="stat-label">Total Applications</span>
-				</div>
-<%
-pendingCount = 0;
-approvedCount = 0;
-for each app in applicationsList
-{
-	if(app.Application_Stage.contains("Pending") || app.Application_Stage.contains("Review"))
-	{
-		pendingCount = pendingCount + 1;
-	}
-	if(app.Application_Stage.contains("Acceptance") || app.Application_Stage.contains("Complete"))
-	{
-		approvedCount = approvedCount + 1;
-	}
-}
-%>
-				<div class="stat-item">
-					<span class="stat-number" id="pendingCount"><%=pendingCount%></span>
-					<span class="stat-label">Pending Review</span>
-				</div>
-				<div class="stat-item">
-					<span class="stat-number" id="approvedCount"><%=approvedCount%></span>
-					<span class="stat-label">Approved</span>
-				</div>
-			</div>
-		</div>
-	</div>
+    <div class="widget-container">
+        <!-- Debug Info -->
+        <div class="debug-info" id="debugInfo">
+            Status: <span id="debugStatus">Initializing...</span><br>
+            Data Source: <span id="debugSource">Unknown</span><br>
+            Records: <span id="debugCount">0</span>
+        </div>
+        
+        <div class="page-header">
+            <div class="container">
+                <div class="page-title">
+                    <div class="icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <div>
+                        <h1>All Applications</h1>
+                        <p style="margin: 0; opacity: 0.8; font-size: 14px;">
+                            Applications Widget
+                        </p>
+                    </div>
+                </div>
+                <div class="page-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalCount">0</span>
+                        <span class="stat-label">Total Applications</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="pendingCount">0</span>
+                        <span class="stat-label">Pending Review</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="approvedCount">0</span>
+                        <span class="stat-label">Approved</span>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-	<div class="content-container">
-		<a href="#" class="back-button" onclick="history.back()">
-			<i class="fas fa-arrow-left"></i> Back to Dashboard
-		</a>
-		
-		<!-- Search Section -->
-		<div class="search-section">
-			<div class="search-container">
-				<input type="text" 
-					   id="searchInput" 
-					   class="search-input" 
-					   placeholder="Search by Student Name, App ID, Passport, Program, or Stage..."
-					   autocomplete="off">
-				<i class="fas fa-search search-icon"></i>
-			</div>
-			<div class="search-info">
-				<div class="search-help">
-					<i class="fas fa-info-circle"></i>
-					<span>Search across all fields including Student Name, App ID, Passport, Program, and Application Stage</span>
-				</div>
-				<div style="display: flex; gap: 15px; align-items: center;">
-					<span class="search-results" id="searchResults">Showing <%=applicationsList.count()%> applications</span>
-					<button class="clear-search" id="clearSearch" onclick="clearSearch()" style="display: none;">Clear Search</button>
-				</div>
-			</div>
-		</div>
-		
-		<div class="applications-section">
-			<div class="section-header">
-				<div class="section-title">
-					<i class="fas fa-list"></i>
-					Applications Report
-				</div>
-				<div class="filter-info">
-					<%=if(input.profile == "Active Agent","Filtered by: Your assignments","Showing: All applications")%>
-				</div>
-			</div>
-<%
-if(applicationsList.count() > 0)
-{
-%>
-			<table class="applications-table" id="applicationsTable">
-				<thead>
-					<tr>
-						<th>App ID</th>
-						<th>Full Name</th>
-						<th>Program</th>
-						<th>Academic Year</th>
-						<th>Semester</th>
-						<th>Degree</th>
-						<th>Stage</th>
-						<th>Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-<%
-counter = 1;
-for each app in applicationsList
-{
-	studentName = if(app.Student_Application != null,app.Student_Application.Full_Name,"N/A");
-	studentID = if(app.Student_Application != null,app.Student_Application.ID,"N/A");
-	studentPassport = if(app.Student_Application != null,app.Student_Application.Passport_No,"N/A");
-	programName = if(app.Application_Program != null,app.Application_Program.Program_Name,"N/A");
-	degree = if(app.Degree != null,app.Degree,"N/A");
-	yearName = if(app.Application_Academic_Year != null,app.Application_Academic_Year.Academic_Year,"N/A");
-	semesterName = if(app.Application_Semester != null,app.Application_Semester.Semester_Name,"N/A");
-	stage = if(app.Application_Stage != null,app.Application_Stage,"Pending Review");
-	appID = if(app.App_ID != null && app.App_ID != "",app.App_ID,"N/A");
-	// Determine stage class for styling
-	stageClass = "stage-pending";
-	if(stage.contains("Acceptance") || stage.contains("Final"))
-	{
-		stageClass = "stage-approved";
-	}
-	else if(stage.contains("Paid") || stage.contains("Complete"))
-	{
-		stageClass = "stage-complete";
-	}
-	else if(stage.contains("Conditional"))
-	{
-		stageClass = "stage-conditional";
-	}
-	else if(stage.contains("Refused") || stage.contains("Invalid"))
-	{
-		stageClass = "stage-rejected";
-	}
-	else if(stage.contains("Review") || stage.contains("Awaiting"))
-	{
-		stageClass = "stage-review";
-	}
-	else if(stage.contains("Missing"))
-	{
-		stageClass = "stage-missing";
-	}
-%>
-					<tr class="application-row" 
-						data-student-name="<%=studentName%>" 
-						data-app-id="<%=appID%>" 
-						data-passport="<%=studentPassport%>"
-						data-program="<%=programName%>" 
-						data-stage="<%=stage%>"
-						data-degree="<%=degree%>"
-						data-year="<%=yearName%>"
-						data-semester="<%=semesterName%>">
-						<td>
-							<span class="app-id-cell"><%=appID%></span>
-						</td>
-						<td>
-							<div class="student-name"><%=studentName%></div>
-							<div class="student-id">ID: <%=studentID%> | Passport: <%=studentPassport%></div>
-						</td>
-						<td>
-							<div class="program-info"><%=programName%></div>
-						</td>
-						<td>
-							<div class="academic-info">
-								<span class="year-badge"><%=yearName%></span>
-							</div>
-						</td>
-						<td>
-							<div class="academic-info">
-								<span class="semester-badge"><%=semesterName%></span>
-							</div>
-						</td>
-						<td>
-							<span class="degree-badge"><%=degree%></span>
-						</td>
-						<td>
-							<span class="stage-badge <%=stageClass%>">
-								<i class="fas fa-circle"></i>
-								<%=stage%>
-							</span>
-						</td>
-						<td class="actions-cell">
-							<a href="
-<%
-if(input.profile == "Active Agent")
-{
-%>
-https://agc9mh.zohocreatorportal.com/#page:Application_Details?application_id=<%=app.ID%>
-<%
-}
-else
-{
-%>
-https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M28OGgOdzkfyAMqq3nyJNrUaQnWVCmur4d1H8vSPaVJ51Rw6VEr7yxPqN4ye3XyS9C40hw6YmHp39OhF5JbwauPQQZOtmKz51Vvd?application_id=<%=app.ID%>
-<%
-}
-%>
-" class="view-btn">
-								<i class="fas fa-eye"></i>
-								View
-							</a>
-						</td>
-					</tr>
-<%
-}
-%>
-				</tbody>
-			</table>
-			
-			<!-- No Search Results Message -->
-			<div class="no-results" id="noResults">
-				<i class="fas fa-search"></i>
-				<h3>No applications found</h3>
-				<p>Try adjusting your search terms or clear the search to see all applications</p>
-			</div>
-<%
-}
-else
-{
-%>
-			<div class="no-applications">
-				<i class="fas fa-file-alt"></i>
-				<h3>No Applications Found</h3>
-				<p><%=if(input.profile == "Active Agent","You don't have any assigned applications yet.","No applications have been submitted yet.")%></p>
-			</div>
-<%
-}
-%>
-		</div>
-	</div>
+        <!-- Search Section -->
+        <div class="search-section">
+            <div class="search-container">
+                <input type="text" 
+                       id="searchInput" 
+                       class="search-input" 
+                       placeholder="Search by Student Name, App ID, Passport, Program, or Stage..."
+                       autocomplete="off">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            <div class="search-info">
+                <div class="search-help">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Search across all fields including Student Name, App ID, Passport, Program, and Application Stage</span>
+                </div>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <span class="search-results" id="searchResults">Loading applications...</span>
+                    <button class="clear-search" id="clearSearch" onclick="clearSearch()" style="display: none;">Clear Search</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="applications-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <i class="fas fa-list"></i>
+                    Applications Report
+                </div>
+                <div class="filter-info" id="filterInfo">
+                    Widget Mode - Real-time Data
+                </div>
+            </div>
 
-	<script>
-		// Global variables
-		var totalApplications = <%=applicationsList.count()%>;
-		var currentSearchTerm = '';
-		
-		// Main filter function
-		function filterApplications(searchTerm) {
-			if (typeof searchTerm !== 'string') searchTerm = '';
-			searchTerm = searchTerm.toLowerCase().trim();
-			currentSearchTerm = searchTerm;
-			
-			var rows = document.querySelectorAll('.application-row');
-			var visibleCount = 0;
-			
-			if (searchTerm === '') {
-				// Show all rows
-				for (var i = 0; i < rows.length; i++) {
-					rows[i].style.display = '';
-				}
-				visibleCount = totalApplications;
-				showClearButton(false);
-				showNoResults(false);
-			} else {
-				// Filter rows
-				for (var i = 0; i < rows.length; i++) {
-					var row = rows[i];
-					var studentName = (row.getAttribute('data-student-name') || '').toLowerCase();
-					var appId = (row.getAttribute('data-app-id') || '').toLowerCase();
-					var passport = (row.getAttribute('data-passport') || '').toLowerCase();
-					var program = (row.getAttribute('data-program') || '').toLowerCase();
-					var stage = (row.getAttribute('data-stage') || '').toLowerCase();
-					var degree = (row.getAttribute('data-degree') || '').toLowerCase();
-					var year = (row.getAttribute('data-year') || '').toLowerCase();
-					var semester = (row.getAttribute('data-semester') || '').toLowerCase();
-					
-					// Check if search term exists in any of the fields
-					if (studentName.indexOf(searchTerm) !== -1 || 
-						appId.indexOf(searchTerm) !== -1 || 
-						passport.indexOf(searchTerm) !== -1 ||
-						program.indexOf(searchTerm) !== -1 || 
-						stage.indexOf(searchTerm) !== -1 ||
-						degree.indexOf(searchTerm) !== -1 ||
-						year.indexOf(searchTerm) !== -1 ||
-						semester.indexOf(searchTerm) !== -1) {
-						row.style.display = '';
-						visibleCount++;
-					} else {
-						row.style.display = 'none';
-					}
-				}
-				showClearButton(true);
-				showNoResults(visibleCount === 0);
-			}
-			
-			// Update search results count
-			updateResultsCount(searchTerm, visibleCount);
-		}
-		
-		function updateResultsCount(searchTerm, visibleCount) {
-			var searchResults = document.getElementById('searchResults');
-			if (searchResults) {
-				if (searchTerm === '') {
-					searchResults.textContent = 'Showing ' + totalApplications + ' applications';
-				} else {
-					searchResults.textContent = 'Found ' + visibleCount + ' of ' + totalApplications + ' applications';
-				}
-			}
-		}
-		
-		function showClearButton(show) {
-			var clearBtn = document.getElementById('clearSearch');
-			if (clearBtn) {
-				clearBtn.style.display = show ? 'inline' : 'none';
-			}
-		}
-		
-		function showNoResults(show) {
-			var noResults = document.getElementById('noResults');
-			var applicationsTable = document.getElementById('applicationsTable');
-			
-			if (noResults && applicationsTable) {
-				if (show) {
-					applicationsTable.style.display = 'none';
-					noResults.style.display = 'block';
-				} else {
-					applicationsTable.style.display = 'table';
-					noResults.style.display = 'none';
-				}
-			}
-		}
-		
-		function clearSearch() {
-			var searchInput = document.getElementById('searchInput');
-			if (searchInput) {
-				searchInput.value = '';
-				filterApplications('');
-				searchInput.focus();
-			}
-		}
-		
-		// Add event listeners when page loads
-		document.addEventListener('DOMContentLoaded', function() {
-			var searchInput = document.getElementById('searchInput');
-			if (searchInput) {
-				searchInput.addEventListener('input', function() {
-					filterApplications(this.value);
-				});
-				
-				searchInput.addEventListener('keyup', function() {
-					filterApplications(this.value);
-				});
-				
-				searchInput.addEventListener('paste', function() {
-					var self = this;
-					setTimeout(function() {
-						filterApplications(self.value);
-					}, 100);
-				});
-				
-				// Auto-focus search input
-				setTimeout(function() {
-					searchInput.focus();
-				}, 500);
-			}
-		});
-		
-		console.log('All Applications page with search loaded');
-		console.log('User profile: <%=input.profile%>');
-		console.log('Total applications: <%=applicationsList.count()%>');
-	</script>
+            <!-- Loading State -->
+            <div class="loading" id="loadingState">
+                <i class="fas fa-spinner"></i>
+                <p>Loading applications from Zoho Creator...</p>
+            </div>
+            
+            <table class="applications-table" id="applicationsTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>App ID</th>
+                        <th>Full Name</th>
+                        <th>Program</th>
+                        <th>Academic Year</th>
+                        <th>Semester</th>
+                        <th>Degree</th>
+                        <th>Stage</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="applicationsTableBody">
+                </tbody>
+            </table>
+            
+            <!-- No Search Results Message -->
+            <div class="no-results" id="noResults">
+                <i class="fas fa-search"></i>
+                <h3>No applications found</h3>
+                <p>Try adjusting your search terms or clear the search to see all applications</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let applicationsData = [];
+        let filteredData = [];
+        let totalApplications = 0;
+        let currentSearchTerm = '';
+        let isDebugMode = false;
+        
+        // Initialize widget and listen for data from parent
+        function initWidget() {
+            console.log('Widget initialized - waiting for data from Zoho Creator');
+            
+            // Check if debug mode is enabled
+            const urlParams = new URLSearchParams(window.location.search);
+            isDebugMode = urlParams.get('debug') === 'true';
+            
+            if (isDebugMode) {
+                document.getElementById('debugInfo').style.display = 'block';
+            }
+            
+            updateDebug('Widget initialized', 'Initializing', 0);
+            
+            // Add search event listeners
+            setupSearchListeners();
+            
+            // Listen for data from parent (Zoho Creator)
+            window.addEventListener('message', handleParentMessage);
+            
+            // Load sample data if no parent window (for testing)
+            setTimeout(function() {
+                if (applicationsData.length === 0) {
+                    console.log('No data received from parent, loading sample data');
+                    updateDebug('Timeout - loading sample', 'Sample Data', 0);
+                    loadSampleData();
+                }
+            }, 3000);
+            
+            // Auto-focus search input
+            setTimeout(function() {
+                const searchInput = document.getElementById('searchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                }
+            }, 500);
+        }
+        
+        // Setup search event listeners
+        function setupSearchListeners() {
+            const searchInput = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearch');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    filterApplications(this.value);
+                });
+                
+                searchInput.addEventListener('keyup', function() {
+                    filterApplications(this.value);
+                });
+                
+                searchInput.addEventListener('paste', function() {
+                    const self = this;
+                    setTimeout(function() {
+                        filterApplications(self.value);
+                    }, 100);
+                });
+            }
+            
+            if (clearBtn) {
+                clearBtn.addEventListener('click', clearSearch);
+            }
+        }
+        
+        // Handle messages from parent window (Zoho Creator)
+        function handleParentMessage(event) {
+            console.log('Received message from parent:', event.data);
+            updateDebug('Message received', 'Parent Window', 0);
+            
+            if (event.data && event.data.type === 'APPLICATIONS_DATA') {
+                console.log('Processing applications data:', event.data.applications);
+                processApplicationsData(event.data.applications || []);
+            }
+        }
+        
+        // Process applications data from Zoho
+        function processApplicationsData(rawData) {
+            applicationsData = [];
+            
+            rawData.forEach(function(app, index) {
+                try {
+                    // Convert Zoho data structure to widget format
+                    const processedApp = {
+                        id: app.ID || (index + 1),
+                        appId: app.App_ID || 'N/A',
+                        studentName: app.Student_Application ? app.Student_Application.Full_Name : 'N/A',
+                        studentID: app.Student_Application ? app.Student_Application.ID : 'N/A',
+                        studentPassport: app.Student_Application ? app.Student_Application.Passport_No : 'N/A',
+                        programName: app.Application_Program ? app.Application_Program.Program_Name : 'N/A',
+                        degree: app.Degree || 'N/A',
+                        yearName: app.Application_Academic_Year ? app.Application_Academic_Year.Academic_Year : 'N/A',
+                        semesterName: app.Application_Semester ? app.Application_Semester.Semester_Name : 'N/A',
+                        stage: app.Application_Stage || 'Pending Review',
+                        viewUrl: buildViewUrl(app.ID, app.profile)
+                    };
+                    
+                    applicationsData.push(processedApp);
+                } catch (error) {
+                    console.error('Error processing application:', app, error);
+                }
+            });
+            
+            filteredData = applicationsData.slice();
+            totalApplications = applicationsData.length;
+            
+            console.log('Processed', totalApplications, 'applications');
+            updateDebug('Data processed', 'Zoho Creator', totalApplications);
+            
+            renderApplications();
+            updateStats();
+            updateSearchResults();
+        }
+        
+        // Build view URL based on profile
+        function buildViewUrl(applicationId, profile) {
+            if (profile === "Active Agent") {
+                return `https://agc9mh.zohocreatorportal.com/#page:Application_Details?application_id=${applicationId}`;
+            } else {
+                return `https://creatorapp.zohopublic.com/agc9mh/daxow/page-perma/Application_Details/M28OGgOdzkfyAMqq3nyJNrUaQnWVCmur4d1H8vSPaVJ51Rw6VEr7yxPqN4ye3XyS9C40hw6YmHp39OhF5JbwauPQQZOtmKz51Vvd?application_id=${applicationId}`;
+            }
+        }
+        
+        // Load sample data for testing
+        function loadSampleData() {
+            applicationsData = [
+                {
+                    id: 1,
+                    appId: 'APP001',
+                    studentName: 'Mohamed Ahmed',
+                    studentID: 'STU001',
+                    studentPassport: 'P123456',
+                    programName: 'Computer Science, BS',
+                    degree: 'Bachelor',
+                    yearName: '2025/2026',
+                    semesterName: 'Fall',
+                    stage: 'Pending Review',
+                    viewUrl: '#'
+                },
+                {
+                    id: 2,
+                    appId: 'APP002',
+                    studentName: 'Ahmed Ali Hassan',
+                    studentID: 'STU002',
+                    studentPassport: 'P789012',
+                    programName: 'Business Administration, MBA',
+                    degree: 'Master',
+                    yearName: '2025/2026',
+                    semesterName: 'Spring',
+                    stage: 'Final Acceptance',
+                    viewUrl: '#'
+                },
+                {
+                    id: 3,
+                    appId: 'APP003',
+                    studentName: 'Sara Hassan Mohamed',
+                    studentID: 'STU003',
+                    studentPassport: 'P345678',
+                    programName: 'Engineering, MS',
+                    degree: 'Master',
+                    yearName: '2024/2025',
+                    semesterName: 'Fall',
+                    stage: 'Awaiting Review',
+                    viewUrl: '#'
+                }
+            ];
+            
+            filteredData = applicationsData.slice();
+            totalApplications = applicationsData.length;
+            
+            console.log('Sample data loaded:', totalApplications, 'applications');
+            updateDebug('Sample data loaded', 'Sample Data', totalApplications);
+            
+            renderApplications();
+            updateStats();
+            updateSearchResults();
+        }
+        
+        // Update debug information
+        function updateDebug(status, source, count) {
+            if (isDebugMode) {
+                document.getElementById('debugStatus').textContent = status;
+                document.getElementById('debugSource').textContent = source;
+                document.getElementById('debugCount').textContent = count;
+            }
+        }
+        
+        // Update statistics
+        function updateStats() {
+            let pendingCount = 0;
+            let approvedCount = 0;
+            
+            applicationsData.forEach(function(app) {
+                const stage = (app.stage || '').toLowerCase();
+                
+                if (stage.includes('pending') || stage.includes('review')) {
+                    pendingCount++;
+                }
+                if (stage.includes('acceptance') || stage.includes('complete')) {
+                    approvedCount++;
+                }
+            });
+            
+            document.getElementById('totalCount').textContent = totalApplications;
+            document.getElementById('pendingCount').textContent = pendingCount;
+            document.getElementById('approvedCount').textContent = approvedCount;
+        }
+        
+        // Main filter function
+        function filterApplications(searchTerm) {
+            if (typeof searchTerm !== 'string') searchTerm = '';
+            searchTerm = searchTerm.toLowerCase().trim();
+            currentSearchTerm = searchTerm;
+            
+            console.log('Filtering with term:', searchTerm);
+            
+            if (searchTerm === '') {
+                filteredData = applicationsData.slice();
+            } else {
+                filteredData = applicationsData.filter(function(app) {
+                    const studentName = (app.studentName || '').toLowerCase();
+                    const appId = (app.appId || '').toLowerCase();
+                    const passport = (app.studentPassport || '').toLowerCase();
+                    const program = (app.programName || '').toLowerCase();
+                    const stage = (app.stage || '').toLowerCase();
+                    const degree = (app.degree || '').toLowerCase();
+                    const year = (app.yearName || '').toLowerCase();
+                    const semester = (app.semesterName || '').toLowerCase();
+                    
+                    return studentName.includes(searchTerm) || 
+                           appId.includes(searchTerm) || 
+                           passport.includes(searchTerm) ||
+                           program.includes(searchTerm) || 
+                           stage.includes(searchTerm) ||
+                           degree.includes(searchTerm) ||
+                           year.includes(searchTerm) ||
+                           semester.includes(searchTerm);
+                });
+            }
+            
+            renderApplications();
+            updateSearchResults();
+            showClearButton(searchTerm !== '');
+        }
+        
+        // Render applications table
+        function renderApplications() {
+            const tableBody = document.getElementById('applicationsTableBody');
+            const table = document.getElementById('applicationsTable');
+            const loading = document.getElementById('loadingState');
+            const noResults = document.getElementById('noResults');
+            
+            // Hide loading
+            loading.style.display = 'none';
+            
+            if (totalApplications === 0) {
+                table.style.display = 'none';
+                noResults.style.display = 'none';
+                return;
+            }
+            
+            if (filteredData.length === 0 && currentSearchTerm !== '') {
+                table.style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            // Show table and hide no results
+            table.style.display = 'table';
+            noResults.style.display = 'none';
+            
+            // Clear existing rows
+            tableBody.innerHTML = '';
+            
+            // Add rows
+            filteredData.forEach(function(app) {
+                const row = document.createElement('tr');
+                row.className = 'application-row';
+                
+                const stageClass = getStageClass(app.stage || '');
+                
+                row.innerHTML = 
+                    '<td><span class="app-id-cell">' + (app.appId || 'N/A') + '</span></td>' +
+                    '<td>' +
+                        '<div class="student-name">' + (app.studentName || 'N/A') + '</div>' +
+                        '<div class="student-id">ID: ' + (app.studentID || 'N/A') + ' | Passport: ' + (app.studentPassport || 'N/A') + '</div>' +
+                    '</td>' +
+                    '<td><div class="program-info">' + (app.programName || 'N/A') + '</div></td>' +
+                    '<td><div class="academic-info"><span class="year-badge">' + (app.yearName || 'N/A') + '</span></div></td>' +
+                    '<td><div class="academic-info"><span class="semester-badge">' + (app.semesterName || 'N/A') + '</span></div></td>' +
+                    '<td><span class="degree-badge">' + (app.degree || 'N/A') + '</span></td>' +
+                    '<td><span class="stage-badge ' + stageClass + '"><i class="fas fa-circle"></i> ' + (app.stage || 'Pending Review') + '</span></td>' +
+                    '<td class="actions-cell"><a href="' + (app.viewUrl || '#') + '" class="view-btn" target="_top"><i class="fas fa-eye"></i> View</a></td>';
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Get stage CSS class (same logic as your original code)
+        function getStageClass(stage) {
+            const stageLower = stage.toLowerCase();
+            if (stageLower.includes('acceptance') || stageLower.includes('final')) {
+                return 'stage-approved';
+            } else if (stageLower.includes('paid') || stageLower.includes('complete')) {
+                return 'stage-complete';
+            } else if (stageLower.includes('conditional')) {
+                return 'stage-conditional';
+            } else if (stageLower.includes('refused') || stageLower.includes('invalid')) {
+                return 'stage-rejected';
+            } else if (stageLower.includes('review') || stageLower.includes('awaiting')) {
+                return 'stage-review';
+            } else if (stageLower.includes('missing')) {
+                return 'stage-missing';
+            }
+            return 'stage-pending';
+        }
+        
+        // Update search results count
+        function updateSearchResults() {
+            const searchResults = document.getElementById('searchResults');
+            if (searchResults) {
+                if (currentSearchTerm === '') {
+                    searchResults.textContent = 'Showing ' + totalApplications + ' applications';
+                } else {
+                    searchResults.textContent = 'Found ' + filteredData.length + ' of ' + totalApplications + ' applications';
+                }
+            }
+        }
+        
+        // Show/hide clear search button
+        function showClearButton(show) {
+            const clearBtn = document.getElementById('clearSearch');
+            if (clearBtn) {
+                clearBtn.style.display = show ? 'inline' : 'none';
+            }
+        }
+        
+        // Clear search
+        function clearSearch() {
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+                filterApplications('');
+                searchInput.focus();
+            }
+        }
+        
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', initWidget);
+        
+        // Also initialize immediately (fallback)
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initWidget);
+        } else {
+            initWidget();
+        }
+        
+        console.log('Widget script loaded successfully');
+    </script>
 </body>
 </html>
